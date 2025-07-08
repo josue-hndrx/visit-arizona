@@ -288,7 +288,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
       }
     }
-    console.log("Applying pre-filters:", facetFilters); // Optional: for debugging
     return facetFilters;
   }
 
@@ -350,7 +349,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const { containerSelector, title, items } = options;
 
     let currentState = {
-      selected: null,
+      selected: "Today",
     };
 
     return {
@@ -358,16 +357,11 @@ document.addEventListener("DOMContentLoaded", function () {
       _helper: null,
 
       _refine(value) {
-        console.log(`[Debug DateFilter] 6. Refining state to: "${value}"`);
         const newValue = currentState.selected === value ? null : value;
         currentState.selected = newValue;
 
         // Use the helper's setState method to trigger a proper search
         if (this._helper) {
-          console.log(
-            "[Debug DateFilter] 7. Using helper.setState() to trigger search..."
-          );
-
           // Clear existing date refinements
           let newState = this._helper.state
             .clearRefinements("startTimestamp")
@@ -377,10 +371,6 @@ document.addEventListener("DOMContentLoaded", function () {
           if (newValue) {
             const selectedRange = items.find((item) => item.label === newValue);
             if (selectedRange) {
-              console.log(
-                `[Debug DateFilter] Applying range for "${newValue}":`,
-                selectedRange
-              );
               newState = newState
                 .addNumericRefinement("startTimestamp", "<=", selectedRange.end)
                 .addNumericRefinement(
@@ -401,10 +391,8 @@ document.addEventListener("DOMContentLoaded", function () {
       },
 
       init(initOptions) {
-        console.log("[Debug DateFilter] 1. Initializing widget...");
         // Store the helper reference
         this._helper = initOptions.helper;
-        console.log("[Debug DateFilter] Saved helper:", this._helper);
 
         const container = document.querySelector(containerSelector);
         if (!container) {
@@ -415,19 +403,16 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         container.addEventListener("click", (event) => {
-          console.log("[Debug DateFilter] 4. Click event detected.");
           const element = event.target.closest("a");
           if (element) {
             event.preventDefault();
             const value = element.dataset.value;
-            console.log(`[Debug DateFilter] 5. Clicked on value: "${value}"`);
             this._refine(value);
           }
         });
       },
 
       render(renderOptions) {
-        console.log("[Debug DateFilter] 2. Rendering UI...");
         const container = document.querySelector(containerSelector);
 
         if (container) {
@@ -479,19 +464,12 @@ document.addEventListener("DOMContentLoaded", function () {
       },
 
       getWidgetSearchParameters(searchParameters, searchOptions) {
-        console.log(
-          `[Debug DateFilter] 3. Applying search parameters. Current selection: "${currentState.selected}"`
-        );
-
         // This should now fire every time because we're using helper.setState()
         const currentParams = searchParameters
           .clearRefinements("startTimestamp")
           .clearRefinements("endTimestamp");
 
         if (!currentState.selected) {
-          console.log(
-            "[Debug DateFilter] No selection, returning cleared params"
-          );
           return currentParams;
         }
 
@@ -499,16 +477,9 @@ document.addEventListener("DOMContentLoaded", function () {
           (item) => item.label === currentState.selected
         );
         if (!selectedRange) {
-          console.log(
-            "[Debug DateFilter] Selected range not found, returning cleared params"
-          );
           return currentParams;
         }
 
-        console.log(
-          `[Debug DateFilter] Found range for "${currentState.selected}". Applying filters...`,
-          `Start: ${selectedRange.start}, End: ${selectedRange.end}`
-        );
         return currentParams
           .addNumericRefinement("startTimestamp", "<=", selectedRange.end)
           .addNumericRefinement("endTimestamp", ">=", selectedRange.start);
@@ -565,9 +536,9 @@ document.addEventListener("DOMContentLoaded", function () {
                    <button class="remove-refinement-button" data-value="${
                      refinement.value
                    }" data-attribute="${group.attribute}">
-                     <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
-                       <path d="M14.6261 14.2725L14.2725 14.6261C14.0772 14.8213 13.7607 14.8213 13.5654 14.6261L9.49954 10.5602L5.43364 14.626C5.23842 14.8213 4.92183 14.8213 4.72657 14.626L4.37301 14.2725C4.17775 14.0772 4.17775 13.7607 4.37301 13.5654L8.43889 9.49954L4.37301 5.43364C4.17775 5.23842 4.17775 4.92183 4.37301 4.72657L4.72656 4.37302C4.92182 4.17775 5.23842 4.17775 5.43364 4.37302L9.49954 8.43889L13.5654 4.37301C13.7607 4.17775 14.0772 4.17775 14.2725 4.37301L14.6261 4.72656C14.8213 4.92182 14.8213 5.23842 14.6261 5.43364L10.5602 9.49954L14.6261 13.5654C14.8213 13.7607 14.8213 14.0772 14.6261 14.2725Z" fill="white" style="fill:white;fill-opacity:1;"/>
-                     </svg>                       
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7.88893 7.62073L7.62067 7.88893C7.47258 8.03702 7.23243 8.03702 7.08428 7.88893L4 4.8046L0.915674 7.88887C0.767579 8.03702 0.527419 8.03702 0.379296 7.88887L0.111092 7.62067C-0.0370308 7.47258 -0.0370308 7.23243 0.111092 7.08428L3.19541 4L0.111092 0.915674C-0.0370308 0.767579 -0.0370308 0.527419 0.111092 0.379296L0.37929 0.111098C0.527413 -0.0370254 0.767579 -0.0370254 0.915674 0.111098L4 3.19541L7.08428 0.111092C7.23243 -0.0370308 7.47258 -0.0370308 7.62067 0.111092L7.88893 0.37929C8.03702 0.527413 8.03702 0.767579 7.88893 0.915674L4.8046 4L7.88893 7.08428C8.03702 7.23243 8.03702 7.47258 7.88893 7.62073Z" fill="white" style="fill:white;fill-opacity:1;"/>
+                    </svg>                                       
                    </button>
                  </span>
                </li>
@@ -644,19 +615,19 @@ document.addEventListener("DOMContentLoaded", function () {
   search.addWidgets([
     instantsearch.widgets.searchBox({
       container: "#f-cards-filter_searchbox",
-      placeholder: "Looking for something? Start typing.",
+      placeholder: "Search Events",
       searchAsYouType: true,
       showSubmit: false,
     }),
 
-    instantsearch.widgets.stats({
-      container: "#f-cards-filter_stats",
-      templates: {
-        text(data, { html }) {
-          return html`${data.nbHits} events found.`;
-        },
-      },
-    }),
+    // instantsearch.widgets.stats({
+    //   container: "#f-cards-filter_stats",
+    //   templates: {
+    //     text(data, { html }) {
+    //       return html`${data.nbHits} events found.`;
+    //     },
+    //   },
+    // }),
 
     instantsearch.widgets.stats({
       container: "#apply-results-text",
@@ -782,7 +753,7 @@ document.addEventListener("DOMContentLoaded", function () {
       container: "#f-cards-filter_pagination",
       showFirst: false,
       showLast: false,
-      scrollTo: ".f-cards-grid-layout-1_algolia-testing-area",
+      scrollTo: ".f-cards-grid-layout-1_body",
       templates: {
         previous: () => `
          <div class="f-cards-grid-layout-1_direction-button prev">
