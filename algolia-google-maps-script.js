@@ -49,7 +49,7 @@ const FACET_LABEL_MAP = {
     cities: "Cities & Towns",
     "parks-monuments": "Parks & Monuments",
     "rivers-lakes": "Rivers & Lakes",
-    "american-indian": "American Indians",
+    "american-indian": "Tribal Lands",
   },
 };
 
@@ -82,117 +82,148 @@ let currentMarkers = {};
 let activeMarker = null;
 let currentPopup = null;
 let hasInitialZoomed = false;
+let isProgrammaticPan = false;
+let searchOnIdle;
 
 // --- 1. GET ALL OUR ELEMENTS ---
-const drawer = document.querySelector(
+const mainDrawer = document.querySelector(
   ".f-cards-grid-layout-1_map-list-wrapper"
 );
-const handle = document.getElementById("drawer-handle");
+const mainDrawerHandle = document.getElementById("drawer-handle");
 const openTrigger = document.getElementById("filters-trigger-button");
 const closeTrigger = document.getElementById("drawer-close-button");
+const overlay = document.getElementById("drawer-bg-overlay");
 
-if (!drawer || !handle || !openTrigger || !closeTrigger) {
-  console.error("One or more essential drawer elements are missing!");
-} else {
-  // --- 2. DEFINE STATE VARIABLES ---
+function openMainDrawer() {
+  const mainDrawer = document.querySelector(
+    ".f-cards-grid-layout-1_map-list-wrapper"
+  );
+  const overlay = document.getElementById("drawer-bg-overlay");
+  if (mainDrawer) mainDrawer.classList.add("is-open");
+  if (overlay) overlay.classList.add("is-open");
+  document.body.classList.add("no-scroll");
+}
+
+function closeMainDrawer() {
+  const mainDrawer = document.querySelector(
+    ".f-cards-grid-layout-1_map-list-wrapper"
+  );
+  const overlay = document.getElementById("drawer-bg-overlay");
+  if (mainDrawer) mainDrawer.classList.remove("is-open");
+  if (overlay) overlay.classList.remove("is-open");
+  document.body.classList.remove("no-scroll");
+}
+
+openTrigger.addEventListener("click", openMainDrawer);
+closeTrigger.addEventListener("click", closeMainDrawer);
+overlay.addEventListener("click", closeMainDrawer);
+
+// Apply our reusable drag logic to the main drawer
+makeDrawerDraggable(
+  mainDrawer,
+  mainDrawerHandle,
+  openMainDrawer,
+  closeMainDrawer
+);
+
+function openDrawer() {
+  drawer.classList.add("is-open");
+  overlay.classList.add("is-open");
+  document.body.classList.add("no-scroll");
+  // We remove the inline style to let the CSS class handle the final position
+  drawer.style.transform = "";
+}
+
+function closeDrawer() {
+  drawer.classList.remove("is-open");
+  overlay.classList.remove("is-open");
+  document.body.classList.remove("no-scroll");
+  // We remove the inline style to let the CSS class handle the final position
+  drawer.style.transform = "";
+}
+
+/**
+ * Makes a drawer element draggable via a handle.
+ * @param {HTMLElement} drawer - The drawer element to be moved.
+ * @param {HTMLElement} handle - The handle element that initiates the drag.
+ * @param {Function} openFn - The function to call to snap the drawer open.
+ * @param {Function} closeFn - The function to call to snap the drawer closed.
+ */
+function makeDrawerDraggable(drawer, handle, openFn, closeFn) {
+  if (!drawer || !handle) return;
+
   let isDragging = false;
   let startY;
   let startTransform;
 
-  // --- 3. EVENT LISTENERS FOR OPEN/CLOSE BUTTONS ---
-  openTrigger.addEventListener("click", openDrawer);
-  closeTrigger.addEventListener("click", closeDrawer);
-
-  function openDrawer() {
-    drawer.classList.add("is-open");
-    // We remove the inline style to let the CSS class handle the final position
-    drawer.style.transform = "";
-  }
-
-  function closeDrawer() {
-    drawer.classList.remove("is-open");
-    // We remove the inline style to let the CSS class handle the final position
-    drawer.style.transform = "";
-  }
-
-  // --- 4. TOUCH EVENT LISTENERS FOR DRAGGING ---
   handle.addEventListener("touchstart", onDragStart, { passive: false });
-  handle.addEventListener("touchmove", onDragMove, { passive: false });
-  handle.addEventListener("touchend", onDragEnd);
-
-  // Also add mouse events for desktop testing
   handle.addEventListener("mousedown", onDragStart);
-  window.addEventListener("mousemove", onDragMove);
-  window.addEventListener("mouseup", onDragEnd);
 
   function onDragStart(e) {
-    // Only drag with the primary mouse button or a touch
     if (e.type === "mousedown" && e.button !== 0) return;
-
     isDragging = true;
-    // Disable CSS transitions for instant feedback
     drawer.classList.add("is-dragging");
-
-    // Record the starting Y position
     startY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
 
-    // Record the drawer's initial transform value
     const currentTransform = window
       .getComputedStyle(drawer)
       .getPropertyValue("transform");
-    if (currentTransform && currentTransform !== "none") {
-      startTransform = new DOMMatrix(currentTransform).m42; // m42 is the translateY value
-    } else {
-      startTransform = drawer.classList.contains("is-open")
-        ? 0
-        : window.innerHeight;
-    }
+    startTransform =
+      currentTransform && currentTransform !== "none"
+        ? new DOMMatrix(currentTransform).m42
+        : drawer.offsetTop;
+
+    window.addEventListener("touchmove", onDragMove, { passive: false });
+    window.addEventListener("mousemove", onDragMove);
+    window.addEventListener("touchend", onDragEnd);
+    window.addEventListener("mouseup", onDragEnd);
+    window.addEventListener("touchcancel", onDragEnd);
   }
 
   function onDragMove(e) {
     if (!isDragging) return;
-
-    // This is important to prevent the page from scrolling on mobile
     e.preventDefault();
-
     const currentY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
     const deltaY = currentY - startY;
     let newTransform = startTransform + deltaY;
 
-    // --- Clamp the drag to stay within bounds ---
     const minTransform = 0; // Fully open
-    const maxTransform = drawer.clientHeight - 60; // Fully collapsed (drawer height - handle height)
+    const maxTransform = window.innerHeight - handle.offsetHeight; // Fully closed
     newTransform = Math.max(minTransform, Math.min(newTransform, maxTransform));
-
-    // Apply the new position directly as an inline style
     drawer.style.transform = `translateY(${newTransform}px)`;
   }
 
   function onDragEnd(e) {
     if (!isDragging) return;
     isDragging = false;
-
-    // Re-enable CSS transitions for the "snap" animation
     drawer.classList.remove("is-dragging");
 
-    // --- Decide where to snap ---
-    // Get the final position of the drawer
+    // ... remove listeners ...
+
     const finalTransform = new DOMMatrix(
       window.getComputedStyle(drawer).getPropertyValue("transform")
     ).m42;
-    const drawerMidPoint = drawer.clientHeight / 2;
+    const endY =
+      e.type === "touchend" ? e.changedTouches[0].clientY : e.clientY;
+    const deltaY = endY - startY; // How far the user dragged in total
 
-    // If the drawer is dragged more than halfway down, snap it closed. Otherwise, snap it open.
-    if (finalTransform > drawerMidPoint) {
-      closeDrawer();
+    // --- NEW, MORE FORGIVING LOGIC ---
+    const shouldClose =
+      deltaY > 75 || // If user swiped down more than 75px (a clear flick)
+      finalTransform > window.innerHeight * 0.6; // Or if it's over 60% down the screen
+
+    drawer.style.transform = ""; // Let CSS handle the animation
+
+    if (shouldClose) {
+      if (closeFn) closeFn();
     } else {
-      openDrawer();
+      if (openFn) openFn();
     }
   }
 }
 
 /**
- * Zooms and centers the map to fit all current markers
+ * Smoothly animates the camera to show all markers with proper bounds
  * @param {Array} hits - Array of hit objects from Algolia
  * @param {Object} options - Configuration options
  */
@@ -201,7 +232,7 @@ function autoZoomToResults(hits, options = {}) {
     return;
   }
 
-  const { padding = 50, maxZoom = 15 } = options;
+  const { padding = 50, maxZoom = 15, duration = 1000 } = options;
 
   const validHits = hits.filter(
     (hit) => hit._geoloc && hit._geoloc.lat && hit._geoloc.lng
@@ -217,12 +248,82 @@ function autoZoomToResults(hits, options = {}) {
   });
 
   if (validHits.length === 1) {
+    // Smooth pan and zoom for single marker
     map.panTo(validHits[0]._geoloc);
-    map.setZoom(maxZoom);
+    if (map.getZoom() < maxZoom) {
+      setTimeout(() => map.setZoom(maxZoom), 200);
+    }
     return;
   }
 
+  // Smooth bounds fitting with animation
   map.fitBounds(bounds, padding);
+}
+
+/**
+ * Smoothly animates camera movement for mobile with intelligent zoom control
+ * @param {Object} targetPosition - The lat/lng to move to
+ * @param {Object} options - Animation options
+ */
+function smoothCameraTransition(targetPosition, options = {}) {
+  const {
+    minZoom = 10,
+    maxZoom = 14,
+    yOffset = 150,
+    duration = 1500,
+    easing = "ease-out",
+  } = options;
+
+  const currentZoom = map.getZoom();
+  const projection = map.getProjection();
+
+  // Determine target zoom intelligently
+  let targetZoom = currentZoom;
+  if (currentZoom < minZoom) {
+    targetZoom = minZoom;
+  } else if (currentZoom > maxZoom) {
+    targetZoom = maxZoom;
+  }
+
+  // Calculate offset position
+  let targetCenter = targetPosition;
+  if (projection && yOffset) {
+    const point = projection.fromLatLngToPoint(targetPosition);
+    const offsetPoint = new google.maps.Point(
+      point.x,
+      point.y + yOffset / Math.pow(2, targetZoom)
+    );
+    targetCenter = projection.fromPointToLatLng(offsetPoint);
+  }
+
+  // Use Google Maps' smooth pan and zoom
+  if (Math.abs(currentZoom - targetZoom) > 0.1) {
+    // If zoom needs to change, do it smoothly
+    map.panTo(targetCenter);
+    setTimeout(() => {
+      map.setZoom(targetZoom);
+    }, duration / 3); // Start zoom after 1/3 of pan duration
+  } else {
+    // Just pan smoothly
+    map.panTo(targetCenter);
+  }
+}
+
+/**
+ * Sets the z-index for all markers, with active marker on top
+ * @param {string} activeObjectID - The objectID of the currently active marker
+ */
+function updateMarkerZIndices(activeObjectID = null) {
+  Object.keys(currentMarkers).forEach((objectID) => {
+    const marker = currentMarkers[objectID];
+    if (objectID === activeObjectID) {
+      // Active marker gets highest z-index
+      marker.zIndex = 1000;
+    } else {
+      // All other markers get default z-index
+      marker.zIndex = 1;
+    }
+  });
 }
 
 /**
@@ -272,7 +373,6 @@ function getPrefiltersFromDOM() {
     }
   }
 
-  console.log("Applying pre-filters:", facetFilters); // For debugging
   return facetFilters;
 }
 
@@ -335,8 +435,13 @@ async function initializeMap() {
   }
 }
 
-// UPDATED: Now has single smooth pan logic
+const infoDrawer = document.getElementById("info-drawer");
+
 function handleMarkerOrResultClick(hit) {
+  clearTimeout(searchOnIdle);
+
+  // --- 1. UNIFIED CLEANUP ---
+  // Deactivate any currently active marker
   if (activeMarker) {
     activeMarker.marker.content.classList.remove("is-active");
     const oldListItem = document.querySelector(
@@ -346,94 +451,228 @@ function handleMarkerOrResultClick(hit) {
     activeMarker = null;
   }
 
+  // Close the desktop popup if it exists
   if (currentPopup) {
     currentPopup.setMap(null);
     currentPopup = null;
   }
 
-  if (!hit) return;
+  // Find and remove the mobile info drawer if it exists
+  const existingInfoDrawer = document.getElementById("info-drawer-card");
+  if (existingInfoDrawer) {
+    // Hide it first for the animation out
+    existingInfoDrawer.classList.remove("is-open");
+    // Remove from DOM after animation
+    setTimeout(() => {
+      existingInfoDrawer.remove();
+    }, 400);
+  }
 
+  if (!hit) {
+    // Reset all z-indices when closing
+    updateMarkerZIndices();
+    return;
+  }
+
+  // --- 2. PREPARE FOR NEW MARKER ---
   const newMarker = currentMarkers[hit.objectID];
   const newListItem = document.querySelector(
     `.f-map-filter_item-card[data-object-id="${hit.objectID}"]`
   );
 
   if (newMarker) {
-    // --- Single Smooth Pan Logic ---
-    const projection = map.getProjection();
-    if (projection) {
-      const point = projection.fromLatLngToPoint(newMarker.position);
-      // Offset the center point by -150px on the Y axis to move the map down
-      const newPoint = new google.maps.Point(
-        point.x,
-        point.y - 150 / Math.pow(2, map.getZoom())
-      );
-      const newCenter = projection.fromPointToLatLng(newPoint);
-      map.panTo(newCenter);
-    } else {
-      // Fallback for when projection is not ready
-      map.panTo(newMarker.position);
-    }
+    // Update z-indices with this marker as active
+    updateMarkerZIndices(hit.objectID);
 
+    // Shared logic: Pan map, set active marker
+    isProgrammaticPan = true;
     newMarker.content.classList.add("is-active");
     activeMarker = { marker: newMarker, hit: hit };
 
-    const popupContent = document.createElement("div");
     const placeTypeTag = formatFacetValue(hit.placeType, "Regions");
     const color = FACET_COLOR_MAP[hit.placeType] || "#333";
     const iconUrl = FACET_ICON_MAP.placeType[hit.placeType] || "";
 
-    // UPDATED: Popup HTML with colored elements, icon, and restored button structure
-    popupContent.innerHTML = `
-          <div class="f-map-filter_info-card">
-            <div class="f-map-filter_info-card-header">
-              <div class="f-map-filter_info-card-head-content">
-                 <div class="info-pane-icon-container" style="background-color: ${color};">
-                    <img src="${iconUrl}" alt="${placeTypeTag}">
-                 </div>
-                <div class="f-map-filter_info-card-head-text-content">
-                  <div class="f-map-filter_info-card-heading">${hit.Name}</div>
-                  <div class="f-map-filter_info-card-tag" style="color: ${color};">${placeTypeTag}</div>
-                </div>
-              </div>
-              <div id="popup-close-button" class="f-map-filter_info-card-close-button w-embed">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" fill="none"><rect x="0.759766" y="0.757812" width="20.48" height="20.48" rx="2.56" fill="#F6F6F6"></rect><path fill-rule="evenodd" clip-rule="evenodd" d="M11 11.1269L7.85691 14.27L7.5957 14.0088L10.7388 10.8657L7.85691 7.98387L8.11811 7.72266L11 10.6045L13.8819 7.72266L14.1431 7.98386L11.2612 10.8657L14.4043 14.0088L14.1431 14.27L11 11.1269Z" fill="#939392" stroke="#780C57" stroke-width="0.64"></path></svg>
-              </div>
+    // --- 3. RESPONSIVE UI LOGIC ---
+    const isMobileView = window.matchMedia("(max-width: 991px)").matches;
+
+    if (isMobileView) {
+      // --- MOBILE: SMOOTH CAMERA TRANSITION ---
+      smoothCameraTransition(newMarker.position, {
+        minZoom: 10,
+        maxZoom: 14,
+        yOffset: 150,
+        duration: 1200,
+      });
+
+      // 3. Build the drawer's HTML with full content
+      const drawerContainer = document.createElement("div");
+      drawerContainer.id = "info-drawer-card";
+      drawerContainer.className = "info-drawer-card";
+      drawerContainer.innerHTML = `
+        <div id="info-drawer-handle" class="info-drawer-handle"></div>
+        <div class="info-drawer-content">
+            <div class="info-card_image-wrapper">
+                <img src="${
+                  hit.thumbnailImage ||
+                  "https://assets-global.website-files.com/62434fa732124a0fb112aab4/62434fa732124a332a12aaf8_placeholder-image.svg"
+                }" 
+                     alt="${hit.thumbnailAltText || hit.Name}" 
+                     class="info-card_image">
+                
+                    <button type="button" id="info-drawer-close-button" class="info-card_icon-button close" aria-label="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path></svg>
+                    </button>
+                    <button type="button" class="info-card_icon-button heart" aria-label="Favorite">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3zm-4.4 15.55-.1.1-.1-.1C7.14 14.24 4 11.39 4 8.5 4 6.5 5.5 5 7.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.89-3.14 5.74-7.9 10.05z"></path></svg>
+                    </button>
             </div>
-            <img src="${hit.thumbnailImage}" loading="lazy" alt="${
-      hit.thumbnailAltText || hit.Name
-    }" class="f-map-filter_info-card-image">
-            <div class="f-map-filter_info-card-bottom">
-              <div class="f-map-filter_info-card-about-text">About this location</div>
-              <p class="f-map-filter_info-card-paragraph">${
-                hit.description || ""
-              }</p>
-              <a href="${
-                hit.webflowLink || "#"
-              }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${color};">
-                <div>Know more</div>
-                <div class="arizona-button_arrow">
-                  <div class="arizona-arrow-icon w-embed">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="12" viewBox="0 0 14 12" fill="none">
-                      <path d="M1.62036 5.36739C1.23862 5.36739 0.929161 5.67685 0.929161 6.05859C0.929161 6.44033 1.23862 6.74979 1.62036 6.74979L1.62036 5.36739ZM13.52 6.54735C13.7899 6.27742 13.7899 5.83977 13.52 5.56984L9.1212 1.17107C8.85127 0.901141 8.41362 0.901141 8.14369 1.17107C7.87376 1.441 7.87376 1.87865 8.14369 2.14858L12.0537 6.05859L8.14369 9.96861C7.87376 10.2385 7.87376 10.6762 8.14369 10.9461C8.41362 11.216 8.85127 11.216 9.1212 10.9461L13.52 6.54735ZM1.62036 6.74979L13.0312 6.74979V5.36739L1.62036 5.36739L1.62036 6.74979Z" fill="white"></path>
-                    </svg>
-                  </div>
-                  <div class="arizona-arrow-icon is-second w-embed">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="12" viewBox="0 0 14 12" fill="none">
-                       <path d="M1.62036 5.36739C1.23862 5.36739 0.929161 5.67685 0.929161 6.05859C0.929161 6.44033 1.23862 6.74979 1.62036 6.74979L1.62036 5.36739ZM13.52 6.54735C13.7899 6.27742 13.7899 5.83977 13.52 5.56984L9.1212 1.17107C8.85127 0.901141 8.41362 0.901141 8.14369 1.17107C7.87376 1.441 7.87376 1.87865 8.14369 2.14858L12.0537 6.05859L8.14369 9.96861C7.87376 10.2385 7.87376 10.6762 8.14369 10.9461C8.41362 11.216 8.85127 11.216 9.1212 10.9461L13.52 6.54735ZM1.62036 6.74979L13.0312 6.74979V5.36739L1.62036 5.36739L1.62036 6.74979Z" fill="${color}"></path>
-                    </svg>
-                  </div>
+            <div class="info-card_content">
+                <div class="info-card_header">
+                    <div class="info-pane-icon-container small" style="background-color: ${color};">
+                      <img src="${iconUrl}" alt="${placeTypeTag}">
+                    </div>
+                    <h3 class="info-card_heading">${hit.Name}</h3>
                 </div>
-              </a>
+                <div>
+                    <div class="info-card_about-title">About this location</div>
+                    <p class="info-card_paragraph">${hit.description || ""}</p>
+                </div>
+                <a href="${
+                  hit.webflowLink || "#"
+                }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${color};">
+                  <div>Know more</div>
+                  <div class="arizona-button_arrow">
+                    <div class="arizona-arrow-icon w-embed">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="12" viewBox="0 0 14 12" fill="none">
+                        <path d="M1.62036 5.36739C1.23862 5.36739 0.929161 5.67685 0.929161 6.05859C0.929161 6.44033 1.23862 6.74979 1.62036 6.74979L1.62036 5.36739ZM13.52 6.54735C13.7899 6.27742 13.7899 5.83977 13.52 5.56984L9.1212 1.17107C8.85127 0.901141 8.41362 0.901141 8.14369 1.17107C7.87376 1.441 7.87376 1.87865 8.14369 2.14858L12.0537 6.05859L8.14369 9.96861C7.87376 10.2385 7.87376 10.6762 8.14369 10.9461C8.41362 11.216 8.85127 11.216 9.1212 10.9461L13.52 6.54735ZM1.62036 6.74979L13.0312 6.74979V5.36739L1.62036 5.36739L1.62036 6.74979Z" fill="white"></path>
+                      </svg>
+                    </div>
+                    <div class="arizona-arrow-icon is-second w-embed">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="12" viewBox="0 0 14 12" fill="none">
+                         <path d="M1.62036 5.36739C1.23862 5.36739 0.929161 5.67685 0.929161 6.05859C0.929161 6.44033 1.23862 6.74979 1.62036 6.74979L1.62036 5.36739ZM13.52 6.54735C13.7899 6.27742 13.7899 5.83977 13.52 5.56984L9.1212 1.17107C8.85127 0.901141 8.41362 0.901141 8.14369 1.17107C7.87376 1.441 7.87376 1.87865 8.14369 2.14858L12.0537 6.05859L8.14369 9.96861C7.87376 10.2385 7.87376 10.6762 8.14369 10.9461C8.41362 11.216 8.85127 11.216 9.1212 10.9461L13.52 6.54735ZM1.62036 6.74979L13.0312 6.74979V5.36739L1.62036 5.36739L1.62036 6.74979Z" fill="${color}"></path>
+                      </svg>
+                    </div>
+                  </div>
+                </a>
+            </div>
+        </div>
+    `;
+      document.body.appendChild(drawerContainer);
+
+      const infoDrawerOverlay = document.getElementById("info-drawer-overlay");
+
+      // 4. Define its open/close functions
+      const closeInfoDrawer = () => {
+        drawerContainer.classList.remove("is-open");
+        if (infoDrawerOverlay) infoDrawerOverlay.classList.remove("is-open");
+        setTimeout(() => drawerContainer.remove(), 400); // Clean up from DOM
+        if (activeMarker) {
+          activeMarker.marker.content.classList.remove("is-active");
+          activeMarker = null;
+        }
+        // Reset z-indices when closing
+        updateMarkerZIndices();
+      };
+
+      const openInfoDrawer = () => {
+        drawerContainer.classList.add("is-open");
+        if (infoDrawerOverlay) infoDrawerOverlay.classList.add("is-open");
+      };
+
+      // 5. Add Listeners and make it draggable
+      const infoDrawerHandle = drawerContainer.querySelector(
+        "#info-drawer-handle"
+      );
+      drawerContainer
+        .querySelector("#info-drawer-close-button")
+        .addEventListener("click", closeInfoDrawer);
+      if (infoDrawerOverlay)
+        infoDrawerOverlay.addEventListener("click", closeInfoDrawer);
+      makeDrawerDraggable(
+        drawerContainer,
+        infoDrawerHandle,
+        openInfoDrawer,
+        closeInfoDrawer
+      );
+
+      // 6. Snap it open
+      setTimeout(openInfoDrawer, 50);
+    } else {
+      // --- DESKTOP: RESTORE OFFSET PANNING AND CREATE POPUP ---
+
+      // 1. Restore the intelligent panning for desktop
+      const projection = map.getProjection();
+      if (projection) {
+        const point = projection.fromLatLngToPoint(newMarker.position);
+        // This number (-150) determines how much the map moves up.
+        // It's divided by the zoom power to feel consistent at different zoom levels.
+        const yOffset = -150;
+        const newPoint = new google.maps.Point(
+          point.x,
+          point.y + yOffset / Math.pow(2, map.getZoom())
+        );
+        const newCenter = projection.fromPointToLatLng(newPoint);
+        map.panTo(newCenter);
+      } else {
+        // Fallback for when projection isn't ready
+        map.panTo(newMarker.position);
+      }
+
+      const popupContent = document.createElement("div");
+
+      popupContent.innerHTML = `
+      <div class="f-map-filter_info-card">
+        <div class="f-map-filter_info-card-header">
+          <div class="f-map-filter_info-card-head-content">
+             <div class="info-pane-icon-container" style="background-color: ${color};">
+                <img src="${iconUrl}" alt="${placeTypeTag}">
+             </div>
+            <div class="f-map-filter_info-card-head-text-content">
+              <div class="f-map-filter_info-card-heading">${hit.Name}</div>
+              <div class="f-map-filter_info-card-tag" style="color: ${color};">${placeTypeTag}</div>
             </div>
           </div>
-        `;
+          <div id="popup-close-button" class="f-map-filter_info-card-close-button w-embed">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" fill="none"><rect x="0.759766" y="0.757812" width="20.48" height="20.48" rx="2.56" fill="#F6F6F6"></rect><path fill-rule="evenodd" clip-rule="evenodd" d="M11 11.1269L7.85691 14.27L7.5957 14.0088L10.7388 10.8657L7.85691 7.98387L8.11811 7.72266L11 10.6045L13.8819 7.72266L14.1431 7.98386L11.2612 10.8657L14.4043 14.0088L14.1431 14.27L11 11.1269Z" fill="#939392" stroke="#780C57" stroke-width="0.64"></path></svg>
+          </div>
+        </div>
+        <img src="${hit.thumbnailImage}" loading="lazy" alt="${
+        hit.thumbnailAltText || hit.Name
+      }" class="f-map-filter_info-card-image">
+        <div class="f-map-filter_info-card-bottom">
+          <div class="f-map-filter_info-card-about-text">About this location</div>
+          <p class="f-map-filter_info-card-paragraph">${
+            hit.description || ""
+          }</p>
+          <a href="${
+            hit.webflowLink || "#"
+          }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${color};">
+            <div>Know more</div>
+            <div class="arizona-button_arrow">
+              <div class="arizona-arrow-icon w-embed">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="12" viewBox="0 0 14 12" fill="none">
+                  <path d="M1.62036 5.36739C1.23862 5.36739 0.929161 5.67685 0.929161 6.05859C0.929161 6.44033 1.23862 6.74979 1.62036 6.74979L1.62036 5.36739ZM13.52 6.54735C13.7899 6.27742 13.7899 5.83977 13.52 5.56984L9.1212 1.17107C8.85127 0.901141 8.41362 0.901141 8.14369 1.17107C7.87376 1.441 7.87376 1.87865 8.14369 2.14858L12.0537 6.05859L8.14369 9.96861C7.87376 10.2385 7.87376 10.6762 8.14369 10.9461C8.41362 11.216 8.85127 11.216 9.1212 10.9461L13.52 6.54735ZM1.62036 6.74979L13.0312 6.74979V5.36739L1.62036 5.36739L1.62036 6.74979Z" fill="white"></path>
+                </svg>
+              </div>
+              <div class="arizona-arrow-icon is-second w-embed">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="12" viewBox="0 0 14 12" fill="none">
+                   <path d="M1.62036 5.36739C1.23862 5.36739 0.929161 5.67685 0.929161 6.05859C0.929161 6.44033 1.23862 6.74979 1.62036 6.74979L1.62036 5.36739ZM13.52 6.54735C13.7899 6.27742 13.7899 5.83977 13.52 5.56984L9.1212 1.17107C8.85127 0.901141 8.41362 0.901141 8.14369 1.17107C7.87376 1.441 7.87376 1.87865 8.14369 2.14858L12.0537 6.05859L8.14369 9.96861C7.87376 10.2385 7.87376 10.6762 8.14369 10.9461C8.41362 11.216 8.85127 11.216 9.1212 10.9461L13.52 6.54735ZM1.62036 6.74979L13.0312 6.74979V5.36739L1.62036 5.36739L1.62036 6.74979Z" fill="${color}"></path>
+                </svg>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    `;
 
-    popupContent
-      .querySelector("#popup-close-button")
-      .addEventListener("click", () => handleMarkerOrResultClick(null));
-    currentPopup = new CustomPopup(newMarker.position, popupContent);
-    currentPopup.setMap(map);
+      popupContent
+        .querySelector("#popup-close-button")
+        .addEventListener("click", () => handleMarkerOrResultClick(null));
+
+      currentPopup = new CustomPopup(newMarker.position, popupContent);
+      currentPopup.setMap(map);
+    }
   }
 
   if (newListItem) {
@@ -458,6 +697,9 @@ function updateMapMarkers(hits) {
       const markerContent = document.createElement("div");
       markerContent.classList.add("advanced-marker");
       const color = FACET_COLOR_MAP[hit.placeType];
+
+      if (hit.placeType) markerContent.dataset.placeType = hit.placeType;
+
       if (color) markerContent.style.backgroundColor = color;
       const iconUrl = FACET_ICON_MAP.placeType[hit.placeType];
       if (iconUrl)
@@ -468,7 +710,16 @@ function updateMapMarkers(hits) {
         title: hit.Name,
         content: markerContent,
       });
-      marker.addListener("click", () => handleMarkerOrResultClick(hit));
+
+      marker.addListener("click", (e) => {
+        // --- MODIFICATION HERE ---
+        // Only stop propagation if it's a real DOM event
+        if (e && e.domEvent) {
+          e.domEvent.stopPropagation();
+        }
+        handleMarkerOrResultClick(hit);
+      });
+
       currentMarkers[hit.objectID] = marker;
     }
   });
@@ -540,20 +791,30 @@ function setupMapSearch() {
         container.addEventListener("click", (event) => {
           event.preventDefault();
           const listItem = event.target.closest(".f-map-filter_item-card");
-          const objectId = listItem ? listItem.dataset.objectId : null;
-          if (objectId) {
-            const marker = currentMarkers[objectId];
-            if (marker) {
+          if (!listItem) return;
+
+          const objectId = listItem.dataset.objectId;
+          const marker = currentMarkers[objectId];
+          if (!marker) return;
+
+          // --- NEW RESPONSIVE LOGIC ---
+          const isMobileView = window.matchMedia("(max-width: 991px)").matches;
+
+          if (isMobileView) {
+            // On mobile, close the main drawer first, then open the info drawer
+            closeMainDrawer();
+            setTimeout(() => {
               google.maps.event.trigger(marker, "click");
-            } else {
-              console.warn(`Marker with ObjectID ${objectId} not found.`);
-            }
+            }, 350); // Wait for the main drawer's close animation
+          } else {
+            // On desktop, the original behavior is correct
+            google.maps.event.trigger(marker, "click");
           }
         });
       }
 
       const hitsContainer = container.querySelector(".hits-container");
-      if (!isFirstRender) handleMarkerOrResultClick(null);
+      // if (!isFirstRender) handleMarkerOrResultClick(null);
 
       if (hits.length === 0) {
         hitsContainer.innerHTML = `<div class="f-map-filter_no-results">No results found.</div>`;
@@ -607,6 +868,19 @@ function setupMapSearch() {
           .join("");
       }
 
+      // --- NEW: RESTORE ACTIVE STATE AFTER RENDER ---
+      // After the list is re-rendered, we check our global state
+      // and re-apply the active class if necessary.
+      if (activeMarker && activeMarker.hit) {
+        const activeObjectID = activeMarker.hit.objectID;
+        const newActiveListItem = hitsContainer.querySelector(
+          `.f-map-filter_item-card[data-object-id="${activeObjectID}"]`
+        );
+        if (newActiveListItem) {
+          newActiveListItem.classList.add("is-active");
+        }
+      }
+
       if (isFirstRender) {
         const sentinel = document.createElement("div");
         sentinel.id = "infinite-scroll-sentinel";
@@ -627,7 +901,7 @@ function setupMapSearch() {
       container: SELECTORS.searchBox,
       placeholder: "Looking for something? Start typing.",
     }),
-    instantsearch.widgets.stats({ container: SELECTORS.stats }),
+    // instantsearch.widgets.stats({ container: SELECTORS.stats }),
     instantsearch.widgets.refinementList({
       container: SELECTORS.filtersList,
       attribute: "placeType",
@@ -674,26 +948,26 @@ function setupMapSearch() {
   mapSearch.start();
 
   let isMapMoving = false;
-  let searchOnIdle;
+  // NEW: Close any open window as soon as the user starts dragging the map.
   map.addListener("dragstart", () => {
-    isMapMoving = true;
-    clearTimeout(searchOnIdle);
+    handleMarkerOrResultClick(null);
   });
+
+  // SIMPLIFIED: The idle listener now ONLY handles searching.
   map.addListener("idle", () => {
-    if (isMapMoving) {
-      isMapMoving = false;
-      clearTimeout(searchOnIdle);
-      searchOnIdle = setTimeout(() => {
-        const bounds = map.getBounds();
-        if (bounds) {
-          handleMarkerOrResultClick(null);
-          mapSearch.helper
-            .setQueryParameter("insideBoundingBox", bounds.toUrlValue())
-            .search();
-        }
-      }, 200);
-    }
+    // We can get rid of the isProgrammaticPan flag check as well.
+    // The timeout prevents a rapid-fire search on every tiny movement.
+    clearTimeout(searchOnIdle);
+    searchOnIdle = setTimeout(() => {
+      const bounds = map.getBounds();
+      if (bounds) {
+        mapSearch.helper
+          .setQueryParameter("insideBoundingBox", bounds.toUrlValue())
+          .search();
+      }
+    }, 300); // 300ms is a good debounce delay
   });
+
   map.addListener("zoom_changed", () => {
     isMapMoving = true;
   });
