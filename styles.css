@@ -30,11 +30,11 @@
   display: flex;
   align-items: center;
   column-gap: var(--tag-gap);
-  padding: 0.4rem 0.25rem 0.4rem 0.5rem;
-  font-size: 0.875rem;
+  padding: 0.4rem 0.4rem 0.4rem 0.5rem;
+  font-size: 0.625rem;
   font-weight: 700;
-  line-height: 150%;
-  letter-spacing: 0.175rem;
+  line-height: 120%;
+  letter-spacing: 0.125rem;
   text-transform: uppercase;
   border-radius: var(--_sizes---border-radius--xxsmall);
   color: #ffffff;
@@ -49,6 +49,28 @@
 }
 
 /* Facet tag color variants */
+.on-card-facet-tag.experience-tag {
+  color: var(--colors-brand--orange-bright);
+}
+.on-card-facet-tag.local-tag {
+  color: var(--colors-brand--purple-light);
+}
+.on-card-facet-tag.event-tag {
+  color: var(--colors-brand--duck-blue-dark);
+}
+.on-card-facet-tag.parks-tag {
+  color: var(--colors-brand--dark-green);
+}
+.on-card-facet-tag.page-tag {
+  color: var(--colors-brand--brown);
+}
+.on-card-facet-tag.native-americans-tag {
+  color: var(--colors-brand--brown-darker);
+}
+.on-card-facet-tag.rivers-tag {
+  color: var(--colors-brand--duck-blue);
+}
+
 .active-facet-tag.region-tag,
 .on-card-facet-tag.region-tag {
   background-color: var(--facet-region-color);
@@ -113,8 +135,8 @@
   flex: 1;
   flex-flow: wrap;
   justify-content: flex-end;
-  max-width: 40rem;
   gap: var(--tag-gap);
+  margin: 0;
 }
 
 /* ==========================================================================
@@ -134,6 +156,9 @@
   cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s;
+  height: 0.5rem;
+  width: 0.5rem;
+  align-items: center;
 }
 
 .remove-refinement-button:hover {
@@ -196,7 +221,7 @@
 
 .ais-Hits-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  grid-template-columns: 1fr 1fr 1fr;
   gap: var(--card-gap);
 }
 
@@ -259,29 +284,22 @@
 
 @media screen and (max-width: 991px) {
   .ais-Hits-list {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
   }
 }
 
 @media screen and (max-width: 479px) {
   .f-cards-grid-layout-1_card-image {
-    aspect-ratio: 1;
+    aspect-ratio: 2;
     margin-bottom: 0.6rem;
   }
   .ais-Hits-list {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 2rem;
     column-gap: 1rem;
   }
-  .f-cards-grid-layout-1_card-desc {
-    font-size: 0.625rem;
-  }
   .f-cards-grid-layout-1_card-h3 {
-    font-size: 0.875rem;
     padding-bottom: 0.3rem;
-  }
-  .on-card-facet-tag {
-    font-size: 0.45375rem;
   }
   .f-cards-filter_tags-container {
     margin-bottom: 0.6rem;
@@ -484,7 +502,6 @@ ul.ais-RefinementList-list {
 /* ==========================================================================
    SEARCH BOX
    ========================================================================== */
-
 .ais-SearchBox-form {
   position: relative;
   display: flex;
@@ -494,6 +511,17 @@ ul.ais-RefinementList-list {
   line-height: 1.25rem;
   background-color: var(--_primitives---colors-neutral--neutral-4);
   border-radius: var(--_sizes---border-radius--medium);
+  border: 2px solid transparent;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.ais-SearchBox-form:hover {
+  border-color: #67b9b1;
+}
+
+.ais-SearchBox-form:has(.ais-SearchBox-input:focus) {
+  border-color: #67b9b1;
+  box-shadow: 0px 0px 0px 3px rgba(103, 185, 177, 0.2);
 }
 
 .ais-SearchBox-form::before {
@@ -505,7 +533,7 @@ ul.ais-RefinementList-list {
   height: 1.5rem;
   margin-top: -0.75rem;
   background: transparent
-    url("data:image/svg+xml,%3Csvg%20width%3D%22100%25%22%20height%3D%22100%25%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M10%2018C11.775%2017.9996%2013.4988%2017.4054%2014.897%2016.312L19.293%2020.708L20.707%2019.294L16.311%2014.898C17.405%2013.4997%2017.9996%2011.7754%2018%2010C18%205.589%2014.411%202%2010%202C5.589%202%202%205.589%202%2010C2%2014.411%205.589%2018%2010%2018ZM10%204C13.309%204%2016%206.691%2016%2010C16%2013.309%2013.309%2016%2010%2016C6.691%2016%204%2013.309%204%2010C4%206.691%206.691%204%2010%204Z%22%20fill%3D%22currentColor%22%20style%3D%22fill%3AcurrentColor%3Bfill%3Acolor(display-p3%200.0902%200.0902%200.0902)%3Bfill-opacity%3A1%3B%22/%3E%3C/svg%3E")
+    url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 18C11.775 17.9996 13.4988 17.4054 14.897 16.312L19.293 20.708L20.707 19.294L16.311 14.898C17.405 13.4997 17.9996 11.7754 18 10C18 5.589 14.411 2 10 2C5.589 2 2 5.589 2 10C2 14.411 5.589 18 10 18ZM10 4C13.309 4 16 6.691 16 10C16 13.309 13.309 16 10 16C6.691 16 4 13.309 4 10C4 6.691 6.691 4 10 4Z' fill='%23171717' style='fill:%23171717;fill:color(display-p3 0.0902 0.0902 0.0902);fill-opacity:1;'/%3E%3C/svg%3E%0A")
     no-repeat;
 }
 
@@ -513,6 +541,7 @@ ul.ais-RefinementList-list {
   flex: 1;
   padding-left: 3rem;
   font-size: 1rem;
+  font-weight: 500;
   background-color: transparent;
   border: none;
   border-radius: 0;
@@ -520,7 +549,7 @@ ul.ais-RefinementList-list {
 }
 
 .ais-SearchBox-input::placeholder {
-  color: var(--_primitives---colors-neutral--neutral-50);
+  color: #8d8c8e;
 }
 
 /* ==========================================================================
