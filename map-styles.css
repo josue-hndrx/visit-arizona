@@ -108,11 +108,16 @@
    ========================================================================== */
 
 .f-cards-grid-layout-1_map-list-wrapper {
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 1rem;
 }
 
-.f-cards-grid-layout-1_map-canvas {
+.f-map-filter_header {
+  margin-bottom: 4.5rem;
+}
+
+#f-map-filter_map-canvas {
   height: 100%;
 }
 
@@ -166,6 +171,12 @@
   background-color: #a6117d; /* A lighter/brighter color for active state */
   transform: scale(1.3);
   z-index: 999;
+}
+
+@media screen and (max-width: 991px) {
+  .f-map-filter_header {
+    margin-bottom: 0rem;
+  }
 }
 
 /* ==========================================================================
@@ -253,8 +264,8 @@
 }
 
 .info-pane-icon-container {
-  width: 40px;
-  height: 40px;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -262,9 +273,19 @@
   flex-shrink: 0;
 }
 
+.info-pane-icon-container.small {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.info-pane-icon-container.small img {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
 .info-pane-icon-container img {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   filter: brightness(0) invert(1); /* Makes SVG white */
 }
 
@@ -454,23 +475,31 @@
   display: none;
 }
 
+.drawer-bg-overlay {
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 300ms ease, visibility 300ms ease;
+  display: block;
+}
+
+.drawer-bg-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
 /* Revert the drawer back to a side panel */
 .f-cards-grid-layout-1_map-list-wrapper {
-  /*
-      Place your EXISTING desktop styles for the side panel here.
-      You'll need to unset all the mobile-specific styles.
-    */
-  position: static; /* Unset fixed positioning */
-  transform: none; /* Remove any translation */
-  width: 380px; /* Example width */
+  position: static;
+  transform: none;
+  width: 26rem;
   height: 100%;
   box-shadow: none;
   border-radius: 0;
-  /* ... and any other desktop styles */
 }
 
 .drawer-content {
-  height: auto; /* Let content flow naturally */
+  height: auto;
 }
 
 @media screen and (max-width: 991px) {
@@ -506,18 +535,17 @@
   /* Hide content scrollbar initially */
   .drawer-content {
     overflow-y: auto;
-    height: calc(90vh - 60px); /* Full drawer height minus handle height */
+    height: 100%;
   }
 
-  /* The Handle for the drawer */
   .drawer-handle {
     width: 100%;
-    height: 60px; /* This is the visible height of your collapsed drawer */
+    height: 60px;
     display: flex;
-    justify-content: space-between; /* Aligns title and close button */
+    justify-content: space-between;
     align-items: center;
     padding: 0 20px;
-    position: relative; /* For centering the title */
+    position: relative;
     cursor: pointer;
     border: none;
     background-color: #fff;
@@ -535,32 +563,33 @@
     margin-bottom: 8px;
   }
 
-  /* The Drawer Container (your side panel) */
   .f-cards-grid-layout-1_map-list-wrapper {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     width: 100%;
-    height: 90vh; /* The maximum height when open */
-    max-height: 90vh;
+    height: 75vh;
+    max-height: 75vh;
     background-color: #fff;
     box-shadow: 0px -4px 20px rgba(0, 0, 0, 0.15);
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
     z-index: 1000;
-
-    /* Animation setup */
-    transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
-
-    /* Start in the collapsed state */
-    /* We move it down by its full height, minus the handle's height */
+    display: flex;
+    flex-direction: column;
     transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    /* transition: transform 100ms ease; */
   }
 
   /* The open state for the drawer */
   .f-cards-grid-layout-1_map-list-wrapper.is-open {
     transform: translateY(0);
+  }
+
+  .f-cards-grid-layout-1_map-list-wrapper.is-dragging {
+    transition: none;
   }
 
   .f-cards-grid-layout-1_map-list-wrapper {
@@ -579,4 +608,204 @@
   .f-map-filter_info-card {
     width: 80vw;
   }
+}
+
+/* ==========================================================================
+     INFO DRAWER STYLES
+   ========================================================================== */
+
+/* --- Draggable Info Drawer (Mobile Only) --- */
+.info-drawer-card {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+
+  /* Height based on content + handle */
+  max-height: 75vh;
+
+  background-color: #fff;
+  box-shadow: 0px -4px 20px rgba(0, 0, 0, 0.15);
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+
+  z-index: 1001; /* Higher than the main drawer */
+
+  /* Start closed */
+  transform: translateY(100%);
+  /* A snappy transition */
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.info-drawer-card.is-open {
+  transform: translateY(0);
+}
+
+/* This class gets added during drag for instant feedback */
+.info-drawer-card.is-dragging {
+  transition: none;
+}
+
+.info-card_content {
+  padding: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.info-card_image {
+  height: 12.5rem;
+  object-fit: cover;
+  width: 100%;
+}
+
+.info-card_icon-button {
+  height: 2.2rem;
+  width: 2.2rem;
+  border-radius: 0.5rem;
+  display: flex;
+  padding: 0.6rem;
+  color: #272726;
+  position: absolute;
+  top: 0.85rem;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1),
+    0px 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.info-card_icon-button.close {
+  left: 0.85rem;
+  border-radius: 100%;
+}
+
+.info-card_icon-button.heart {
+  right: 0.85rem;
+}
+
+.info-card_header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.info-card_heading {
+  font-size: 1.3125rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.info-card_about-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+}
+
+.info-card_paragraph {
+  margin-bottom: 0.45rem;
+}
+
+.info-drawer-handle {
+  width: 100%;
+  padding: 1rem;
+  padding-bottom: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  flex-shrink: 0; /* Prevent handle from shrinking */
+  position: absolute;
+  align-self: center;
+}
+
+.info-drawer-handle:active {
+  cursor: grabbing;
+}
+
+/* The little grey bar */
+.info-drawer-handle::before {
+  content: "";
+  width: 40px;
+  height: 4px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 2px;
+}
+
+.info-drawer-content {
+  overflow-y: auto;
+}
+
+.info-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1000; /* Below the info drawer, above everything else */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.info-drawer-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ==========================================================================
+   PULSE ANIMATION FOR ACTIVE MARKER
+   ========================================================================== */
+
+/* Define the animation */
+@keyframes frank {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* Create the pseudo-element that will be our pulse ring */
+.advanced-marker::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: transparent;
+
+  /* Start hidden and not animating */
+  transform: scale(1);
+  opacity: 0;
+
+  /* This is the key: it's a ring, not a solid circle */
+  border: 2px solid;
+
+  /* Place it behind the main marker dot */
+  z-index: -1;
+}
+
+/* When the marker is active, trigger the animation on its pseudo-element */
+.advanced-marker.is-active::after {
+  animation: frank 1.5s ease-out infinite;
+}
+
+/* Set the pulse color based on the data-attribute we added */
+.advanced-marker[data-place-type="parks-monuments"]::after {
+  border-color: var(--colors-brand--dark-green);
+}
+.advanced-marker[data-place-type="cities"]::after {
+  border-color: var(--colors-brand--orange);
+}
+.advanced-marker[data-place-type="american-indian"]::after {
+  border-color: var(--colors-brand--brown-darker);
+}
+.advanced-marker[data-place-type="rivers-lakes"]::after {
+  border-color: var(--colors-brand--duck-blue);
 }
