@@ -356,15 +356,15 @@ function getPrefiltersFromDOM() {
         }
       }
     }
-    // --- ORIGINAL `data-prefilter` LOGIC ---
+    // --- ORIGINAL `data-` LOGIC ---
     // Check if the config is a simple string (the original way)
     else if (typeof configValue === "string") {
       const container = document.querySelector(configValue);
       if (container) {
-        const prefilterElements =
-          container.querySelectorAll("[data-prefilter]");
-        prefilterElements.forEach((el) => {
-          const filterValue = el.dataset.prefilter;
+        const Elements =
+          container.querySelectorAll("[data-]");
+        Elements.forEach((el) => {
+          const filterValue = el.dataset.;
           if (filterValue) {
             facetFilters.push(`${attributeName}:${filterValue}`);
           }
@@ -376,8 +376,8 @@ function getPrefiltersFromDOM() {
   return facetFilters;
 }
 
-function groupPrefilters(prefilterArray) {
-  return prefilterArray.reduce((grouped, filter) => {
+function groups(Array) {
+  return Array.reduce((grouped, filter) => {
     const [attribute, value] = filter.split(":");
     grouped[attribute] = grouped[attribute]
       ? [...grouped[attribute], value]
@@ -766,9 +766,11 @@ function setupMapSearch() {
       </a>`;
     };
 
-  const prefiltersArray = getPrefiltersFromDOM(); // CHANGED: Call this once at the top
+  const sArray = getPrefiltersFromDOM(); // CHANGED: Call this once at the top
   const prefilters = groupPrefilters(prefiltersArray);
   const initialPrefiltersApplied = prefiltersArray.length > 0; // ADDED: The flag we'll use later
+
+  console.log(prefilters);
 
   const mapSearch = instantsearch({
     indexName: ALGOLIA_CONFIG.indexName,
