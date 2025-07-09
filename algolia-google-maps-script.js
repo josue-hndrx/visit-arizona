@@ -770,8 +770,6 @@ function setupMapSearch() {
   const prefilters = groupPrefilters(prefiltersArray);
   const initialPrefiltersApplied = prefiltersArray.length > 0; // ADDED: The flag we'll use later
 
-  console.log(prefilters);
-
   const mapSearch = instantsearch({
     indexName: ALGOLIA_CONFIG.indexName,
     searchClient,
