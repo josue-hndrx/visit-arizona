@@ -797,6 +797,9 @@
 }
 
 /* Set the pulse color based on the data-attribute we added */
+.advanced-marker::after {
+  border-color: #8a3a6e;
+}
 .advanced-marker[data-place-type="parks-monuments"]::after {
   border-color: var(--colors-brand--dark-green);
 }
