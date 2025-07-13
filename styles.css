@@ -259,7 +259,7 @@
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  display: hidden;
+  display: none;
   align-items: center;
   justify-content: center;
   width: 2rem;
