@@ -513,10 +513,9 @@ function handleMarkerOrResultClick(hit) {
         <div id="info-drawer-handle" class="info-drawer-handle"></div>
         <div class="info-drawer-content">
             <div class="info-card_image-wrapper">
-                <img src="${
-                  hit.thumbnailImage ||
-                  "https://assets-global.website-files.com/62434fa732124a0fb112aab4/62434fa732124a332a12aaf8_placeholder-image.svg"
-                }" 
+                <img src="${hit.thumbnailImage ||
+        "https://assets-global.website-files.com/62434fa732124a0fb112aab4/62434fa732124a332a12aaf8_placeholder-image.svg"
+        }" 
                      alt="${hit.thumbnailAltText || hit.Name}" 
                      class="info-card_image">
                 
@@ -538,9 +537,8 @@ function handleMarkerOrResultClick(hit) {
                     <div class="info-card_about-title">About this location</div>
                     <p class="info-card_paragraph">${hit.description || ""}</p>
                 </div>
-                <a href="${
-                  hit.webflowLink || "#"
-                }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${color};">
+                <a href="${hit.webflowLink || "#"
+        }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${color};">
                   <div>Know more</div>
                   <div class="arizona-button_arrow">
                     <div class="arizona-arrow-icon w-embed">
@@ -637,17 +635,14 @@ function handleMarkerOrResultClick(hit) {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" fill="none"><rect x="0.759766" y="0.757812" width="20.48" height="20.48" rx="2.56" fill="#F6F6F6"></rect><path fill-rule="evenodd" clip-rule="evenodd" d="M11 11.1269L7.85691 14.27L7.5957 14.0088L10.7388 10.8657L7.85691 7.98387L8.11811 7.72266L11 10.6045L13.8819 7.72266L14.1431 7.98386L11.2612 10.8657L14.4043 14.0088L14.1431 14.27L11 11.1269Z" fill="#939392" stroke="#780C57" stroke-width="0.64"></path></svg>
           </div>
         </div>
-        <img src="${hit.thumbnailImage}" loading="lazy" alt="${
-        hit.thumbnailAltText || hit.Name
-      }" class="f-map-filter_info-card-image">
+        <img src="${hit.thumbnailImage}" loading="lazy" alt="${hit.thumbnailAltText || hit.Name
+        }" class="f-map-filter_info-card-image">
         <div class="f-map-filter_info-card-bottom">
           <div class="f-map-filter_info-card-about-text">About this location</div>
-          <p class="f-map-filter_info-card-paragraph">${
-            hit.description || ""
-          }</p>
-          <a href="${
-            hit.webflowLink || "#"
-          }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${color};">
+          <p class="f-map-filter_info-card-paragraph">${hit.description || ""
+        }</p>
+          <a href="${hit.webflowLink || "#"
+        }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${color};">
             <div>Know more</div>
             <div class="arizona-button_arrow">
               <div class="arizona-arrow-icon w-embed">
@@ -743,17 +738,17 @@ function formatFacetValue(str, attributeName) {
 function setupMapSearch() {
   const createRefinementListItemTemplate =
     (attributeName) =>
-    (item, { html }) => {
-      const placeTypeTag = formatFacetValue(item.label, "Regions");
-      const iconClass = `icon--placeType-${item.value.replace(
-        /[^a-zA-Z0-9-_]/g,
-        "-"
-      )}`;
-      return html`<a
+      (item, { html }) => {
+        const placeTypeTag = formatFacetValue(item.label, "Regions");
+        const iconClass = `icon--placeType-${item.value.replace(
+          /[^a-zA-Z0-9-_]/g,
+          "-"
+        )}`;
+        return html`<a
         href="#"
         class="f-map-filter_filter-collection-item ${item.isRefined
-          ? "is-active"
-          : ""}"
+            ? "is-active"
+            : ""}"
         data-value="${item.value}"
       >
         <span
@@ -764,11 +759,13 @@ function setupMapSearch() {
           <span class="facet-count"> (${item.count})</span>
         </div>
       </a>`;
-    };
+      };
 
   const prefiltersArray = getPrefiltersFromDOM(); // CHANGED: Call this once at the top
   const prefilters = groupPrefilters(prefiltersArray);
   const initialPrefiltersApplied = prefiltersArray.length > 0; // ADDED: The flag we'll use later
+
+  console.log(prefilters);
 
   const mapSearch = instantsearch({
     indexName: ALGOLIA_CONFIG.indexName,
@@ -828,15 +825,12 @@ function setupMapSearch() {
             const iconUrl = FACET_ICON_MAP.placeType[hit.placeType] || "";
 
             return `
-              <a href="#" data-object-id="${
-                hit.objectID
+              <a href="#" data-object-id="${hit.objectID
               }" class="f-map-filter_item-card w-inline-block">
                 <div class="f-map-filter_item-card-image-wrapper">
-                  <img src="${
-                    hit.thumbnailImage || placeholderImage
-                  }" loading="lazy" alt="${
-              hit.thumbnailAltText || hit.Name
-            }" class="f-map-filter_item-card-image">
+                  <img src="${hit.thumbnailImage || placeholderImage
+              }" loading="lazy" alt="${hit.thumbnailAltText || hit.Name
+              }" class="f-map-filter_item-card-image">
                   <div class="list-item-icon-tag" style="background-color: ${color};">
                     <img src="${iconUrl}" alt="${hit.placeType}">
                   </div>
@@ -847,8 +841,8 @@ function setupMapSearch() {
                 <div class="f-map-filter_item-card-content">
                   <div class="f-map-filter_item-card-content-head">
                     <h3 class="f-map-filter_item-card-h3">${instantsearch.highlight(
-                      { attribute: "Name", hit }
-                    )}</h3>
+                { attribute: "Name", hit }
+              )}</h3>
                     <div class="f-map-filter_item-card-arrow-button w-embed">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26" fill="none">
                         <rect x="0.5" y="0.5" width="25" height="25" rx="4" fill="${color}"></rect>
@@ -857,10 +851,9 @@ function setupMapSearch() {
                       </svg>
                     </div>
                   </div>
-                  <p class="f-map-filter_item-card-paragraph">${
-                    instantsearch.snippet({ attribute: "description", hit }) ||
-                    ""
-                  }</p>
+                  <p class="f-map-filter_item-card-paragraph">${instantsearch.snippet({ attribute: "description", hit }) ||
+              ""
+              }</p>
                 </div>
               </a>
             `;
@@ -912,6 +905,12 @@ function setupMapSearch() {
     instantsearch.widgets.refinementList({
       container: SELECTORS.prefiltersContainer,
       attribute: "Region",
+      sortBy: ["name:asc"],
+    }),
+
+    instantsearch.widgets.refinementList({
+      container: document.createElement("div"),
+      attribute: "highlightTags",
       sortBy: ["name:asc"],
     }),
 

@@ -496,10 +496,9 @@ function handleMarkerOrResultClick(hit) {
           <div id="info-drawer-handle" class="info-drawer-handle"></div>
           <div class="info-drawer-content">
               <div class="info-card_image-wrapper">
-                  <img src="${
-                    hit.thumbnailImage ||
-                    "https://assets-global.website-files.com/62434fa732124a0fb112aab4/62434fa732124a332a12aaf8_placeholder-image.svg"
-                  }" 
+                  <img src="${hit.thumbnailImage ||
+        "https://assets-global.website-files.com/62434fa732124a0fb112aab4/62434fa732124a332a12aaf8_placeholder-image.svg"
+        }" 
                        alt="${hit.thumbnailAltText || hit.Name}" 
                        class="info-card_image">
                   
@@ -519,13 +518,11 @@ function handleMarkerOrResultClick(hit) {
                   </div>
                   <div>
                       <div class="info-card_about-title">About this location</div>
-                      <p class="info-card_paragraph">${
-                        hit.description || ""
-                      }</p>
+                      <p class="info-card_paragraph">${hit.description || ""
+        }</p>
                   </div>
-                  <a href="${
-                    hit.webflowLink || "#"
-                  }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${EXPERIENCE_COLOR};">
+                  <a href="${hit.webflowLink || "#"
+        }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${EXPERIENCE_COLOR};">
                     <div>Know more</div>
                     <div class="arizona-button_arrow">
                       <div class="arizona-arrow-icon w-embed">
@@ -622,20 +619,16 @@ function handleMarkerOrResultClick(hit) {
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" fill="none"><rect x="0.759766" y="0.757812" width="20.48" height="20.48" rx="2.56" fill="#F6F6F6"></rect><path fill-rule="evenodd" clip-rule="evenodd" d="M11 11.1269L7.85691 14.27L7.5957 14.0088L10.7388 10.8657L7.85691 7.98387L8.11811 7.72266L11 10.6045L13.8819 7.72266L14.1431 7.98386L11.2612 10.8657L14.4043 14.0088L14.1431 14.27L11 11.1269Z" fill="#939392" stroke="#780C57" stroke-width="0.64"></path></svg>
             </div>
           </div>
-          <img src="${
-            hit.thumbnailImage ||
-            "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/684fa625ddd0c993bb2496d7_Card%20Listing%20(Empty).avif"
-          }"" loading="lazy" alt="${
-        hit.thumbnailAltText || hit.Name
-      }" class="f-map-filter_info-card-image">
+          <img src="${hit.thumbnailImage ||
+        "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/684fa625ddd0c993bb2496d7_Card%20Listing%20(Empty).avif"
+        }"" loading="lazy" alt="${hit.thumbnailAltText || hit.Name
+        }" class="f-map-filter_info-card-image">
           <div class="f-map-filter_info-card-bottom">
             <div class="f-map-filter_info-card-about-text">About this location</div>
-            <p class="f-map-filter_info-card-paragraph">${
-              truncateText(hit.description) || ""
-            }</p>
-            <a href="${
-              hit.webflowLink || "#"
-            }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${EXPERIENCE_COLOR};">
+            <p class="f-map-filter_info-card-paragraph">${truncateText(hit.description) || ""
+        }</p>
+            <a href="${hit.webflowLink || "#"
+        }" target="_blank" class="arizona-button w-inline-block" style="background-color: ${EXPERIENCE_COLOR};">
               <div>Know more</div>
               <div class="arizona-button_arrow">
                 <div class="arizona-arrow-icon w-embed">
@@ -789,15 +782,12 @@ function setupMapSearch() {
               "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/684fa625ddd0c993bb2496d7_Card%20Listing%20(Empty).avif";
 
             return `
-                <a href="#" data-object-id="${
-                  hit.objectID
-                }" class="f-map-filter_item-card w-inline-block">
+                <a href="#" data-object-id="${hit.objectID
+              }" class="f-map-filter_item-card w-inline-block">
                   <div class="f-map-filter_item-card-image-wrapper">
-                    <img src="${
-                      hit.thumbnailImage || placeholderImage
-                    }" loading="lazy" alt="${
-              hit.thumbnailAltText || hit.Name
-            }" class="f-map-filter_item-card-image">
+                    <img src="${hit.thumbnailImage || placeholderImage
+              }" loading="lazy" alt="${hit.thumbnailAltText || hit.Name
+              }" class="f-map-filter_item-card-image">
                     <div class="list-item-icon-tag" style="background-color: ${EXPERIENCE_COLOR};">
                       <img src="${EXPERIENCE_ICON_URL}" alt="${hit.placeType}">
                     </div>
@@ -808,8 +798,8 @@ function setupMapSearch() {
                   <div class="f-map-filter_item-card-content">
                     <div class="f-map-filter_item-card-content-head">
                       <h3 class="f-map-filter_item-card-h3">${instantsearch.highlight(
-                        { attribute: "Name", hit }
-                      )}</h3>
+                { attribute: "Name", hit }
+              )}</h3>
                       <div class="f-map-filter_item-card-arrow-button w-embed">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26" fill="none">
                           <rect x="0.5" y="0.5" width="25" height="25" rx="4" fill="${EXPERIENCE_COLOR}"></rect>
@@ -818,12 +808,11 @@ function setupMapSearch() {
                         </svg>
                       </div>
                     </div>
-                    <p class="f-map-filter_item-card-paragraph">${
-                      instantsearch.snippet({
-                        attribute: "description",
-                        hit,
-                      }) || ""
-                    }</p>
+                    <p class="f-map-filter_item-card-paragraph">${instantsearch.snippet({
+                attribute: "description",
+                hit,
+              }) || ""
+              }</p>
                   </div>
                 </a>
               `;
