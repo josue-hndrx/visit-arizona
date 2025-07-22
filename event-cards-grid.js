@@ -349,7 +349,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const { containerSelector, title, items } = options;
 
     let currentState = {
-      selected: "Today",
+      selected: null,
     };
 
     return {
@@ -421,9 +421,8 @@ document.addEventListener("DOMContentLoaded", function () {
             .map(
               (item) => `
               <a href="#" 
-                 class="f-cards-grid-layout-1_events-filter-top-item ${
-                   currentState.selected === item.label ? "is-active" : ""
-                 }" 
+                 class="f-cards-grid-layout-1_events-filter-top-item ${currentState.selected === item.label ? "is-active" : ""
+                }" 
                  data-value="${item.label}">
                 <div class="f-cards-grid-layout-1_events-filter-label">
                   ${item.label}
@@ -437,9 +436,8 @@ document.addEventListener("DOMContentLoaded", function () {
             .map(
               (item) => `
               <a href="#" 
-                 class="f-cards-grid-layout-1_events-filter-bottom-item ${
-                   currentState.selected === item.label ? "is-active" : ""
-                 }" 
+                 class="f-cards-grid-layout-1_events-filter-bottom-item ${currentState.selected === item.label ? "is-active" : ""
+                }" 
                  data-value="${item.label}">
                 <div class="f-cards-grid-layout-1_events-filter-label">
                   ${item.label}
@@ -525,17 +523,15 @@ document.addEventListener("DOMContentLoaded", function () {
         container.innerHTML = `
        <ul class="f-cards-layout-1_CurrentRefinements-list">
          ${filteredItems
-           .flatMap((group) =>
-             group.refinements.map(
-               (refinement) => `
+            .flatMap((group) =>
+              group.refinements.map(
+                (refinement) => `
                <li class="ais-CurrentRefinements-item">
-                 <span class="active-facet-tag ${
-                   FACET_CLASS_MAP[group.attribute] || "default-tag"
-                 }">
+                 <span class="active-facet-tag ${FACET_CLASS_MAP[group.attribute] || "default-tag"
+                  }">
                    ${formatFacetValue(refinement.label, group.attribute)}
-                   <button class="remove-refinement-button" data-value="${
-                     refinement.value
-                   }" data-attribute="${group.attribute}">
+                   <button class="remove-refinement-button" data-value="${refinement.value
+                  }" data-attribute="${group.attribute}">
                     <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M7.88893 7.62073L7.62067 7.88893C7.47258 8.03702 7.23243 8.03702 7.08428 7.88893L4 4.8046L0.915674 7.88887C0.767579 8.03702 0.527419 8.03702 0.379296 7.88887L0.111092 7.62067C-0.0370308 7.47258 -0.0370308 7.23243 0.111092 7.08428L3.19541 4L0.111092 0.915674C-0.0370308 0.767579 -0.0370308 0.527419 0.111092 0.379296L0.37929 0.111098C0.527413 -0.0370254 0.767579 -0.0370254 0.915674 0.111098L4 3.19541L7.08428 0.111092C7.23243 -0.0370308 7.47258 -0.0370308 7.62067 0.111092L7.88893 0.37929C8.03702 0.527413 8.03702 0.767579 7.88893 0.915674L4.8046 4L7.88893 7.08428C8.03702 7.23243 8.03702 7.47258 7.88893 7.62073Z" fill="white" style="fill:white;fill-opacity:1;"/>
                     </svg>                                       
@@ -543,9 +539,9 @@ document.addEventListener("DOMContentLoaded", function () {
                  </span>
                </li>
              `
-             )
-           )
-           .join("")}
+              )
+            )
+            .join("")}
        </ul>
      `;
 
@@ -583,25 +579,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const createRefinementListItemTemplate =
     (attributeName) =>
-    (item, { html }) => {
-      const hasIcon =
-        FACET_ICON_MAP[attributeName] &&
-        FACET_ICON_MAP[attributeName][item.value];
-      let iconHtml = "";
+      (item, { html }) => {
+        const hasIcon =
+          FACET_ICON_MAP[attributeName] &&
+          FACET_ICON_MAP[attributeName][item.value];
+        let iconHtml = "";
 
-      if (hasIcon) {
-        const sanitizedValue = item.value.replace(/[^a-zA-Z0-9-_]/g, "-");
-        const iconClass = `icon--${attributeName}-${sanitizedValue}`;
-        iconHtml = html`<span
+        if (hasIcon) {
+          const sanitizedValue = item.value.replace(/[^a-zA-Z0-9-_]/g, "-");
+          const iconClass = `icon--${attributeName}-${sanitizedValue}`;
+          iconHtml = html`<span
           class="f-cards-grid-layout-1_filter-item-icon ${iconClass}"
         ></span>`;
-      }
+        }
 
-      return html` <a
+        return html` <a
         href="#"
         class="f-cards-grid-layout-1_filter-collection-item ${item.isRefined
-          ? "is-active"
-          : ""}"
+            ? "is-active"
+            : ""}"
         data-value="${item.value}"
       >
         ${iconHtml}
@@ -610,7 +606,7 @@ document.addEventListener("DOMContentLoaded", function () {
           <span class="facet-count"> (${item.count})</span>
         </div>
       </a>`;
-    };
+      };
 
   search.addWidgets([
     instantsearch.widgets.searchBox({
@@ -674,7 +670,7 @@ document.addEventListener("DOMContentLoaded", function () {
           // Generate the date wrapper HTML
           const dateWrapperHtml = isSingleDay
             ? // Single day event - show only start date
-              html`<div
+            html`<div
                 class="f-cards-grid-layout-1_events-date-wrapper"
                 style="transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg); transform-style: preserve-3d;"
               >
@@ -686,7 +682,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
               </div>`
             : // Multi-day event - show start and end dates with chevron
-              html`<div
+            html`<div
                 class="f-cards-grid-layout-1_events-date-wrapper"
                 style="transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg); transform-style: preserve-3d;"
               >
@@ -728,7 +724,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ${dateWrapperHtml}
                 <img
                   src="${hit.thumbnailImage ||
-                  "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/684fa625ddd0c993bb2496d7_Card%20Listing%20(Empty).avif"}"
+            "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/684fa625ddd0c993bb2496d7_Card%20Listing%20(Empty).avif"}"
                   alt="${components.Highlight({ attribute: "Name", hit })}"
                   class="f-cards-grid-layout-1_card-image"
                   onerror="this.style.display='none'"
