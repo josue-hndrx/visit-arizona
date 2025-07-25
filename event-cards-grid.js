@@ -709,7 +709,6 @@
                 .join("");
               container.innerHTML = `
                 <div class="f-cards-grid-layout-1_events-filter-top">
-                  ${quickPickHtml}
                   <div class="date-input-wrapper">
                     <input type="text" id="date-range-picker" class="f-cards-grid-layout-1_events-filter-date-input" placeholder="Select dates" readonly />
                     <button type="button" class="date-clear-btn" style="display: none;">
@@ -718,6 +717,9 @@
                       </svg>
                     </button>
                     <button type="button" class="date-search-btn">Search Dates</button>
+                  </div>
+                  <div class="quick-picks-wrapper">
+                    ${quickPickHtml}
                   </div>
                 </div>
               `;
