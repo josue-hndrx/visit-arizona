@@ -20,10 +20,12 @@ const url = new URL(currentScript.src);
 
 document.addEventListener("DOMContentLoaded", function () {
   // Initialize Algolia search client
-  const searchClient = algoliasearch(
-    "LF0CCFQRH3",
-    "9ff98e053974ef9b01af86dfe17897f7"
-  );
+  const searchClient = algoliasearch("LF0CCFQRH3", "9ff98e053974ef9b01af86dfe17897f7");
+
+  const sortBy =
+    indexName === "like_a_local_cms_items"
+      ? ["publishTimestamp:desc"] // Sort by date, newest first
+      : ["name:asc"]; // Default alphabetical sorting
 
   const indexName = url.searchParams.get("index") || "experiences_cms_items";
 
@@ -62,8 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
         "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/6848c6ecff31a56294ab0aaf_White%20Mountains%20%26%20Eastern%20Arizona%20Icon.svg",
     },
     Categories: {
-      seasons:
-        "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/684f84bc3b96909871c2c906_Vector%20(1).svg",
+      seasons: "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/684f84bc3b96909871c2c906_Vector%20(1).svg",
       "trip-ideas-itineraries":
         "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/684f84ca4bbab778955875a1_Vector%20(2).svg",
       "culture-traditions":
@@ -76,12 +77,10 @@ document.addEventListener("DOMContentLoaded", function () {
         "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/6848c74ae9329898fb11c2da_Family%20Fun%20%26%20Sports%20Icon.svg",
       outdoors:
         "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/6848c7634ad9085c99c8cd41_Outdoor%20Adventure%20Icon.svg",
-      sports:
-        "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/684f84d9133f5c2c8a1c7d1f_Vector%20(4).svg",
+      sports: "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/684f84d9133f5c2c8a1c7d1f_Vector%20(4).svg",
       "places-to-stay":
         "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/684f84e0d0b3b34f0857e2c0_Vector.svg",
-      shopping:
-        "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/684f84e4b49956b356b74b29_Vector%20(5).svg",
+      shopping: "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/684f84e4b49956b356b74b29_Vector%20(5).svg",
       sustainability:
         "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/684f84e967f0201dbb4f4c4b_Vector%20(6).svg",
       "wellness-relaxation":
@@ -158,8 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (container) {
         // Find all elements with the 'data-prefilter' attribute within the container
-        const prefilterElements =
-          container.querySelectorAll("[data-prefilter]");
+        const prefilterElements = container.querySelectorAll("[data-prefilter]");
         prefilterElements.forEach((el) => {
           const filterValue = el.dataset.prefilter;
           if (filterValue) {
@@ -175,9 +173,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function groupPrefilters(prefilterArray) {
     return prefilterArray.reduce((grouped, filter) => {
       const [attribute, value] = filter.split(":");
-      grouped[attribute] = grouped[attribute]
-        ? [...grouped[attribute], value]
-        : [value];
+      grouped[attribute] = grouped[attribute] ? [...grouped[attribute], value] : [value];
       return grouped;
     }, {});
   }
@@ -192,11 +188,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!str) return "";
 
     // First, try to find a specific label in our map.
-    if (
-      attributeName &&
-      FACET_LABEL_MAP[attributeName] &&
-      FACET_LABEL_MAP[attributeName][str]
-    ) {
+    if (attributeName && FACET_LABEL_MAP[attributeName] && FACET_LABEL_MAP[attributeName][str]) {
       return FACET_LABEL_MAP[attributeName][str];
     }
 
@@ -213,37 +205,28 @@ document.addEventListener("DOMContentLoaded", function () {
       return [];
     }
     const cssClass = FACET_CLASS_MAP[attributeName] || "default-tag";
-    return attributeData
-      .slice(0, maxCount || attributeData.length)
-      .map((value) => {
-        // UPDATED: Pass attributeName to formatFacetValue
-        const formattedValue = formatFacetValue(value, attributeName);
-        return html`<span class="on-card-facet-tag ${cssClass}"
-          >${formattedValue}</span
-        >`;
-      });
+    return attributeData.slice(0, maxCount || attributeData.length).map((value) => {
+      // UPDATED: Pass attributeName to formatFacetValue
+      const formattedValue = formatFacetValue(value, attributeName);
+      return html`<span class="on-card-facet-tag ${cssClass}">${formattedValue}</span>`;
+    });
   }
 
   function createCurrentRefinementsWidget(containerSelector) {
-    return instantsearch.connectors.connectCurrentRefinements(
-      (renderOptions, isFirstRender) => {
-        const { items, refine, widgetParams } = renderOptions;
-        const container = document.querySelector(widgetParams.container);
+    return instantsearch.connectors.connectCurrentRefinements((renderOptions, isFirstRender) => {
+      const { items, refine, widgetParams } = renderOptions;
+      const container = document.querySelector(widgetParams.container);
 
-        container.innerHTML = `
+      container.innerHTML = `
          <ul class="f-cards-layout-1_CurrentRefinements-list">
            ${items
              .flatMap((group) =>
                group.refinements.map(
                  (refinement) => `
                  <li class="ais-CurrentRefinements-item">
-                   <span class="active-facet-tag ${
-                     FACET_CLASS_MAP[group.attribute] || "default-tag"
-                   }">
+                   <span class="active-facet-tag ${FACET_CLASS_MAP[group.attribute] || "default-tag"}">
                      ${formatFacetValue(refinement.label, group.attribute)}
-                     <button class="remove-refinement-button" data-value="${
-                       refinement.value
-                     }">
+                     <button class="remove-refinement-button" data-value="${refinement.value}">
                       <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M7.88893 7.62073L7.62067 7.88893C7.47258 8.03702 7.23243 8.03702 7.08428 7.88893L4 4.8046L0.915674 7.88887C0.767579 8.03702 0.527419 8.03702 0.379296 7.88887L0.111092 7.62067C-0.0370308 7.47258 -0.0370308 7.23243 0.111092 7.08428L3.19541 4L0.111092 0.915674C-0.0370308 0.767579 -0.0370308 0.527419 0.111092 0.379296L0.37929 0.111098C0.527413 -0.0370254 0.767579 -0.0370254 0.915674 0.111098L4 3.19541L7.08428 0.111092C7.23243 -0.0370308 7.47258 -0.0370308 7.62067 0.111092L7.88893 0.37929C8.03702 0.527413 8.03702 0.767579 7.88893 0.915674L4.8046 4L7.88893 7.08428C8.03702 7.23243 8.03702 7.47258 7.88893 7.62073Z" fill="white" style="fill:white;fill-opacity:1;"/>
                       </svg>                 
@@ -257,21 +240,20 @@ document.addEventListener("DOMContentLoaded", function () {
          </ul>
        `;
 
-        container.addEventListener("click", (event) => {
-          const button = event.target.closest(".remove-refinement-button");
-          if (button) {
-            event.preventDefault();
-            const refinementToRemove = items
-              .flatMap((group) => group.refinements)
-              .find((ref) => ref.value === button.dataset.value);
+      container.addEventListener("click", (event) => {
+        const button = event.target.closest(".remove-refinement-button");
+        if (button) {
+          event.preventDefault();
+          const refinementToRemove = items
+            .flatMap((group) => group.refinements)
+            .find((ref) => ref.value === button.dataset.value);
 
-            if (refinementToRemove) {
-              refine(refinementToRemove);
-            }
+          if (refinementToRemove) {
+            refine(refinementToRemove);
           }
-        });
-      }
-    )({
+        }
+      });
+    })({
       container: containerSelector,
     });
   }
@@ -292,24 +274,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const createRefinementListItemTemplate =
     (attributeName) =>
     (item, { html }) => {
-      const hasIcon =
-        FACET_ICON_MAP[attributeName] &&
-        FACET_ICON_MAP[attributeName][item.value];
+      const hasIcon = FACET_ICON_MAP[attributeName] && FACET_ICON_MAP[attributeName][item.value];
       let iconHtml = "";
 
       if (hasIcon) {
         const sanitizedValue = item.value.replace(/[^a-zA-Z0-9-_]/g, "-");
         const iconClass = `icon--${attributeName}-${sanitizedValue}`;
-        iconHtml = html`<span
-          class="f-cards-grid-layout-1_filter-item-icon ${iconClass}"
-        ></span>`;
+        iconHtml = html`<span class="f-cards-grid-layout-1_filter-item-icon ${iconClass}"></span>`;
       }
 
       return html` <a
         href="#"
-        class="f-cards-grid-layout-1_filter-collection-item ${item.isRefined
-          ? "is-active"
-          : ""}"
+        class="f-cards-grid-layout-1_filter-collection-item ${item.isRefined ? "is-active" : ""}"
         data-value="${item.value}"
       >
         ${iconHtml}
@@ -345,20 +321,11 @@ document.addEventListener("DOMContentLoaded", function () {
       container: "#f-cards-filter_hits-grid",
       templates: {
         item: (hit, { html, components }) => html`
-          <a
-            href="${hit.webflowLink}"
-            class="f-cards-grid-layout-1_card-link-wrapper"
-          >
+          <a href="${hit.webflowLink}" class="f-cards-grid-layout-1_card-link-wrapper">
             <article class="f-cards-grid-layout-1_algolia-card">
               <div class="f-cards-grid-layout-1_heart-icon-wrapper">
                 <div class="f-cards-grid-layout-1_heart-icon">
-                  <svg
-                    width="12"
-                    height="10"
-                    viewBox="0 0 12 10"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
+                  <svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                       fill-rule="evenodd"
                       clip-rule="evenodd"
@@ -376,15 +343,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 class="f-cards-grid-layout-1_card-image"
                 onerror="this.style.display='none'"
               />
-              <div class="f-cards-filter_tags-container">
-                ${renderFacetTags(hit, "Categories", html, 1)}
-              </div>
+              <div class="f-cards-filter_tags-container">${renderFacetTags(hit, "Categories", html, 1)}</div>
               <h3 class="f-cards-grid-layout-1_card-h3 heading-style-h5">
                 ${components.Highlight({ attribute: "Name", hit })}
               </h3>
-              <p class="f-cards-grid-layout-1_card-desc">
-                ${components.Snippet({ attribute: "description", hit })}
-              </p>
+              <p class="f-cards-grid-layout-1_card-desc">${components.Snippet({ attribute: "description", hit })}</p>
             </article>
           </a>
         `,
@@ -424,31 +387,31 @@ document.addEventListener("DOMContentLoaded", function () {
     instantsearch.widgets.refinementList({
       container: "#f-cards-filter_regions-list",
       attribute: "Regions",
-      sortBy: ["name:asc"],
+      sortBy: sortBy,
       templates: { item: createRefinementListItemTemplate("Regions") },
     }),
     instantsearch.widgets.refinementList({
       container: "#f-cards-filter_amenities-list",
       attribute: "Amenities",
-      sortBy: ["name:asc"],
+      sortBy: sortBy,
       templates: { item: createRefinementListItemTemplate("Amenities") },
     }),
     instantsearch.widgets.refinementList({
       container: "#f-cards-filter_cities-list",
       attribute: "Cities",
-      sortBy: ["name:asc"],
+      sortBy: sortBy,
       templates: { item: createRefinementListItemTemplate("Cities") },
     }),
     instantsearch.widgets.refinementList({
       container: "#f-cards-filter_categories-list",
       attribute: "Categories",
-      sortBy: ["name:asc"],
+      sortBy: sortBy,
       templates: { item: createRefinementListItemTemplate("Categories") },
     }),
     instantsearch.widgets.refinementList({
       container: "#f-cards-filter_highlighttags-list",
       attribute: "highlightTags",
-      sortBy: ["name:asc"],
+      sortBy: sortBy,
       templates: { item: createRefinementListItemTemplate("highlightTags") },
     }),
   ]);
