@@ -992,13 +992,12 @@
                         const customButtonsContainer = document.createElement("div");
                         customButtonsContainer.className = "custom-picker-buttons";
                         customButtonsContainer.style.cssText = `
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-            padding: 10px 15px;
-            border-top: 1px solid #ddd;
-            background: #f8f9fa;
-          `;
+                          display: flex;
+                          gap: 8px;
+                          justify-content: flex-end;
+                          padding: 8px;
+                          width: 100%;
+                        `;
 
                         // Create Apply button
                         const applyBtn = document.createElement("button");
@@ -1006,12 +1005,12 @@
                         applyBtn.className = "custom-apply-btn";
                         applyBtn.style.cssText = `
             padding: 6px 12px;
-            background: #007bff;
+            background: #844114;
             color: white;
-            border: 1px solid #007bff;
+            border: 1px solid #844114;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: .875rem;
           `;
 
                         // Create Cancel button
@@ -1025,7 +1024,7 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: .875rem;
           `;
 
                         // Add event listeners
