@@ -992,38 +992,47 @@
                         const customButtonsContainer = document.createElement("div");
                         customButtonsContainer.className = "custom-picker-buttons";
                         customButtonsContainer.style.cssText = `
-                          display: block;
+                          display: flex;
+                          justify-content: flex-end;
+                          gap: 8px;
                           padding: 8px;
-                        `;
+                          position: absolute;
+                          bottom: 0;
+                          left: 0;
+                          right: 0;
+                          z-index: 10;
+                      `;
+
+                        pickerElement.style.paddingBottom = "38px"; // Add space for the buttons
 
                         // Create Apply button
                         const applyBtn = document.createElement("button");
                         applyBtn.textContent = "Apply";
                         applyBtn.className = "custom-apply-btn";
                         applyBtn.style.cssText = `
-            padding: 6px 12px;
-            background: #844114;
-            color: white;
-            border: 1px solid #844114;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: .875rem;
-            margin-left: 8px;
-          `;
+                          padding: 6px 12px;
+                          background: #844114;
+                          color: white;
+                          border: 1px solid #844114;
+                          border-radius: 4px;
+                          cursor: pointer;
+                          font-size: .875rem;
+                          margin-left: 8px;
+                        `;
 
                         // Create Cancel button
                         const cancelBtn = document.createElement("button");
                         cancelBtn.textContent = "Cancel";
                         cancelBtn.className = "custom-cancel-btn";
                         cancelBtn.style.cssText = `
-            padding: 6px 12px;
-            background: white;
-            color: #333;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: .875rem;
-          `;
+                          padding: 6px 12px;
+                          background: white;
+                          color: #333;
+                          border: 1px solid #ccc;
+                          border-radius: 4px;
+                          cursor: pointer;
+                          font-size: .875rem;
+                        `;
 
                         // Add event listeners
                         applyBtn.addEventListener("click", () => {
