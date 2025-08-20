@@ -694,7 +694,10 @@
                         <path d="M9.5 2.5L2.5 9.5M2.5 2.5L9.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     </button>
-                    <button type="button" class="date-search-btn">Search Dates</button>
+                    <div class="date-picker-buttons">
+                      <button type="button" class="date-submit-btn">Apply</button>
+                      <button type="button" class="date-cancel-btn">Cancel</button>
+                    </div>
                   </div>
                   <div class="quick-picks-wrapper">
                     ${quickPickHtml}
@@ -816,10 +819,41 @@
                 });
               }
 
-              // Add event listener for the search button
-              const searchBtn = container.querySelector(".date-search-btn");
-              if (searchBtn && this._input) {
-                searchBtn.addEventListener("click", () => {
+              // // Add event listener for the search button
+              // const searchBtn = container.querySelector(".date-search-btn");
+              // if (searchBtn && this._input) {
+              //   searchBtn.addEventListener("click", () => {
+              //     // Check if picker has a selection that hasn't been applied yet
+              //     if (this._picker && this._picker.startDate && this._picker.endDate) {
+              //       let start = this._picker.startDate.clone().tz("America/Phoenix").startOf("day");
+              //       let end = this._picker.endDate.clone().tz("America/Phoenix").startOf("day");
+              //       // For single-day, force end = start
+              //       if (start.isSame(end, "day")) {
+              //         end = start.clone();
+              //       }
+
+              //       // Apply this range
+              //       this._applyAlgoliaRefinement(start, end);
+              //       const matchLabel = this._findMatchingQuickPick(start, end);
+              //       if (matchLabel) {
+              //         this._setActiveButton(matchLabel);
+              //       } else {
+              //         this._clearActiveButtons();
+              //       }
+              //       this._currentRange = { start, end };
+              //       this._updateInputDisplay();
+              //     } else if (this._currentRange) {
+              //       // Re-apply current range
+              //       const { start, end } = this._currentRange;
+              //       this._applyAlgoliaRefinement(start, end);
+              //     }
+              //   });
+              // }
+
+              // Add event listener for the submit button
+              const submitBtn = container.querySelector(".date-submit-btn");
+              if (submitBtn && this._input) {
+                submitBtn.addEventListener("click", () => {
                   // Check if picker has a selection that hasn't been applied yet
                   if (this._picker && this._picker.startDate && this._picker.endDate) {
                     let start = this._picker.startDate.clone().tz("America/Phoenix").startOf("day");
@@ -839,10 +873,42 @@
                     }
                     this._currentRange = { start, end };
                     this._updateInputDisplay();
+
+                    // Close the picker after applying
+                    if (this._picker) {
+                      this._picker.hide();
+                    }
                   } else if (this._currentRange) {
                     // Re-apply current range
                     const { start, end } = this._currentRange;
                     this._applyAlgoliaRefinement(start, end);
+                  }
+                });
+              }
+
+              // Add event listener for the cancel button
+              const cancelBtn = container.querySelector(".date-cancel-btn");
+              if (cancelBtn && this._input) {
+                cancelBtn.addEventListener("click", () => {
+                  // Reset to current range or clear if none
+                  if (this._currentRange) {
+                    // Keep the current range but don't change anything
+                    this._updateInputDisplay();
+                  } else {
+                    // Clear everything
+                    this._clearAlgoliaRefinement();
+                    this._clearActiveButtons();
+                    this._currentRange = null;
+                    if (this._picker) {
+                      this._picker.setStartDate(moment.tz("America/Phoenix"));
+                      this._picker.setEndDate(moment.tz("America/Phoenix"));
+                    }
+                    this._updateInputDisplay();
+                  }
+
+                  // Close the picker
+                  if (this._picker) {
+                    this._picker.hide();
                   }
                 });
               }
