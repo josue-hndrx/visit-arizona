@@ -17,7 +17,7 @@
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       if (document.querySelector('script[src="' + src + '"]')) return resolve(); // already loaded
-      const s = document.createElement('script');
+      const s = document.createElement("script");
       s.src = src;
       s.onload = resolve;
       s.onerror = reject;
@@ -27,8 +27,8 @@
   // Utility to load a CSS file
   function loadCSS(href) {
     if (document.querySelector('link[href="' + href + '"]')) return;
-    const l = document.createElement('link');
-    l.rel = 'stylesheet';
+    const l = document.createElement("link");
+    l.rel = "stylesheet";
     l.href = href;
     document.head.appendChild(l);
   }
@@ -36,33 +36,32 @@
   // Wait for Webflow's jQuery to be available
   function waitForJQuery(cb, tries = 30) {
     if (window.jQuery) return cb(window.jQuery);
-    if (tries <= 0) return console.error('[DateFilter] jQuery not found after waiting');
+    if (tries <= 0) return console.error("[DateFilter] jQuery not found after waiting");
     setTimeout(() => waitForJQuery(cb, tries - 1), 100);
   }
 
   waitForJQuery(function ($) {
-    loadScript('https://cdn.jsdelivr.net/momentjs/latest/moment.min.js')
+    loadScript("https://cdn.jsdelivr.net/momentjs/latest/moment.min.js")
       .then(function () {
         // Ensure moment-timezone is loaded
-        return loadScript('https://cdn.jsdelivr.net/npm/moment-timezone@0.5.40/builds/moment-timezone-with-data.min.js');
+        return loadScript(
+          "https://cdn.jsdelivr.net/npm/moment-timezone@0.5.40/builds/moment-timezone-with-data.min.js"
+        );
       })
       .then(function () {
-        return loadScript('https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js');
+        return loadScript("https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js");
       })
       .then(function () {
-        loadCSS('https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css');
+        loadCSS("https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css");
         if (!$.fn.daterangepicker) {
-          console.error('[DateFilter] daterangepicker plugin still not loaded!');
+          console.error("[DateFilter] daterangepicker plugin still not loaded!");
           return;
         }
 
         // --- MAIN CODE STARTS HERE ---
         function runMain() {
           // Initialize Algolia search client
-          const searchClient = algoliasearch(
-            "LF0CCFQRH3",
-            "9ff98e053974ef9b01af86dfe17897f7"
-          );
+          const searchClient = algoliasearch("LF0CCFQRH3", "9ff98e053974ef9b01af86dfe17897f7");
 
           const indexName = "events_cms_items";
 
@@ -175,7 +174,7 @@
           function getArizonaNow() {
             const now = new Date();
             // Get current UTC time in milliseconds
-            const utcMillis = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const utcMillis = now.getTime() + now.getTimezoneOffset() * 60000;
             // Arizona offset in milliseconds (UTC-7)
             const arizonaOffsetMillis = -7 * 60 * 60 * 1000;
             return new Date(utcMillis + arizonaOffsetMillis);
@@ -187,11 +186,11 @@
            */
           function getTodayRange() {
             // Get current moment in Arizona timezone
-            const arizonaNow = moment.tz('America/Phoenix');
+            const arizonaNow = moment.tz("America/Phoenix");
 
             // Get start and end of today in Arizona timezone
-            const start = arizonaNow.clone().startOf('day');
-            const end = arizonaNow.clone().endOf('day');
+            const start = arizonaNow.clone().startOf("day");
+            const end = arizonaNow.clone().endOf("day");
 
             return {
               start: start.unix(),
@@ -338,8 +337,7 @@
 
               if (container) {
                 // Find all elements with the 'data-prefilter' attribute within the container
-                const prefilterElements =
-                  container.querySelectorAll("[data-prefilter]");
+                const prefilterElements = container.querySelectorAll("[data-prefilter]");
                 prefilterElements.forEach((el) => {
                   const filterValue = el.dataset.prefilter;
                   if (filterValue) {
@@ -355,9 +353,7 @@
           function groupPrefilters(prefilterArray) {
             return prefilterArray.reduce((grouped, filter) => {
               const [attribute, value] = filter.split(":");
-              grouped[attribute] = grouped[attribute]
-                ? [...grouped[attribute], value]
-                : [value];
+              grouped[attribute] = grouped[attribute] ? [...grouped[attribute], value] : [value];
               return grouped;
             }, {});
           }
@@ -372,11 +368,7 @@
             if (!str) return "";
 
             // First, try to find a specific label in our map.
-            if (
-              attributeName &&
-              FACET_LABEL_MAP[attributeName] &&
-              FACET_LABEL_MAP[attributeName][str]
-            ) {
+            if (attributeName && FACET_LABEL_MAP[attributeName] && FACET_LABEL_MAP[attributeName][str]) {
               return FACET_LABEL_MAP[attributeName][str];
             }
 
@@ -393,15 +385,11 @@
               return [];
             }
             const cssClass = FACET_CLASS_MAP[attributeName] || "default-tag";
-            return attributeData
-              .slice(0, maxCount || attributeData.length)
-              .map((value) => {
-                // UPDATED: Pass attributeName to formatFacetValue
-                const formattedValue = formatFacetValue(value, attributeName);
-                return html`<span class="on-card-facet-tag ${cssClass}"
-                  >${formattedValue}</span
-                >`;
-              });
+            return attributeData.slice(0, maxCount || attributeData.length).map((value) => {
+              // UPDATED: Pass attributeName to formatFacetValue
+              const formattedValue = formatFacetValue(value, attributeName);
+              return html`<span class="on-card-facet-tag ${cssClass}">${formattedValue}</span>`;
+            });
           }
 
           // --- 2. Custom Date Filter Widget Factory (FINAL - Instance-based) ---
@@ -424,9 +412,7 @@
                 // Use the helper's setState method to trigger a proper search
                 if (this._helper) {
                   // Clear existing date refinements
-                  let newState = this._helper.state
-                    .clearRefinements("startTimestamp")
-                    .clearRefinements("endTimestamp");
+                  let newState = this._helper.state.clearRefinements("startTimestamp").clearRefinements("endTimestamp");
 
                   // Apply new refinements if a date range is selected
                   if (newValue) {
@@ -434,20 +420,14 @@
                     if (selectedRange) {
                       newState = newState
                         .addNumericRefinement("startTimestamp", "<=", selectedRange.end)
-                        .addNumericRefinement(
-                          "endTimestamp",
-                          ">=",
-                          selectedRange.start
-                        );
+                        .addNumericRefinement("endTimestamp", ">=", selectedRange.start);
                     }
                   }
 
                   // Set the new state and search
                   this._helper.setState(newState).search();
                 } else {
-                  console.error(
-                    "[Debug DateFilter] ERROR: Helper not found. Cannot trigger search."
-                  );
+                  console.error("[Debug DateFilter] ERROR: Helper not found. Cannot trigger search.");
                 }
               },
 
@@ -457,9 +437,7 @@
 
                 const container = document.querySelector(containerSelector);
                 if (!container) {
-                  console.error(
-                    `[Debug DateFilter] ERROR: Container element "${containerSelector}" not found.`
-                  );
+                  console.error(`[Debug DateFilter] ERROR: Container element "${containerSelector}" not found.`);
                   return;
                 }
 
@@ -482,8 +460,9 @@
                     .map(
                       (item) => `
                     <a href="#" 
-                       class="f-cards-grid-layout-1_events-filter-top-item ${currentState.selected === item.label ? "is-active" : ""
-                        }" 
+                       class="f-cards-grid-layout-1_events-filter-top-item ${
+                         currentState.selected === item.label ? "is-active" : ""
+                       }" 
                        data-value="${item.label}">
                       <div class="f-cards-grid-layout-1_events-filter-label">
                         ${item.label}
@@ -497,8 +476,9 @@
                     .map(
                       (item) => `
                     <a href="#" 
-                       class="f-cards-grid-layout-1_events-filter-bottom-item ${currentState.selected === item.label ? "is-active" : ""
-                        }" 
+                       class="f-cards-grid-layout-1_events-filter-bottom-item ${
+                         currentState.selected === item.label ? "is-active" : ""
+                       }" 
                        data-value="${item.label}">
                       <div class="f-cards-grid-layout-1_events-filter-label">
                         ${item.label}
@@ -532,9 +512,7 @@
                   return currentParams;
                 }
 
-                const selectedRange = items.find(
-                  (item) => item.label === currentState.selected
-                );
+                const selectedRange = items.find((item) => item.label === currentState.selected);
                 if (!selectedRange) {
                   return currentParams;
                 }
@@ -569,9 +547,9 @@
              * Formats a moment date as "Thu, Jul 24" style
              */
             _formatDateNice(date) {
-              const day = date.format('ddd'); // Mon, Tue, etc.
-              const month = date.format('MMM'); // Jan, Feb, etc.
-              const dayNum = date.format('D'); // 1, 2, 3, etc. (no suffix)
+              const day = date.format("ddd"); // Mon, Tue, etc.
+              const month = date.format("MMM"); // Jan, Feb, etc.
+              const dayNum = date.format("D"); // 1, 2, 3, etc. (no suffix)
               return `${day}, ${month} ${dayNum}`;
             },
 
@@ -581,43 +559,43 @@
             _updateInputDisplay() {
               if (!this._currentRange) {
                 // No active filter - show placeholder
-                this._input.value = '';
-                this._input.placeholder = 'Select dates';
-                this._clearBtn.style.display = 'none';
+                this._input.value = "";
+                this._input.placeholder = "Select dates";
+                this._clearBtn.style.display = "none";
                 return;
               }
 
               const { start, end } = this._currentRange;
-              if (start.isSame(end, 'day')) {
+              if (start.isSame(end, "day")) {
                 // Single day
                 this._input.value = this._formatDateNice(start);
               } else {
                 // Date range
                 this._input.value = `${this._formatDateNice(start)}  —  ${this._formatDateNice(end)}`;
               }
-              this._clearBtn.style.display = 'block';
+              this._clearBtn.style.display = "block";
             },
 
             _setActiveButton(label) {
               this._activeQuickPick = label;
               this._quickPickEls.forEach((el) => {
                 if (el.dataset.value === label) {
-                  el.classList.add('is-active');
+                  el.classList.add("is-active");
                 } else {
-                  el.classList.remove('is-active');
+                  el.classList.remove("is-active");
                 }
               });
             },
             _clearActiveButtons() {
               this._activeQuickPick = null;
-              this._quickPickEls.forEach((el) => el.classList.remove('is-active'));
+              this._quickPickEls.forEach((el) => el.classList.remove("is-active"));
             },
             _findMatchingQuickPick(start, end) {
               // start/end are moment objects (from daterangepicker)
               for (const item of dateFilterItems) {
-                const itemStart = moment.tz(item.start * 1000, 'America/Phoenix').startOf('day');
-                const itemEnd = moment.tz(item.end * 1000, 'America/Phoenix').startOf('day');
-                if (start.isSame(itemStart, 'day') && end.isSame(itemEnd, 'day')) {
+                const itemStart = moment.tz(item.start * 1000, "America/Phoenix").startOf("day");
+                const itemEnd = moment.tz(item.end * 1000, "America/Phoenix").startOf("day");
+                if (start.isSame(itemStart, "day") && end.isSame(itemEnd, "day")) {
                   return item.label;
                 }
               }
@@ -625,7 +603,7 @@
             },
             _isSameRange(a, b) {
               if (!a || !b) return false;
-              return a.start.isSame(b.start, 'day') && a.end.isSame(b.end, 'day');
+              return a.start.isSame(b.start, "day") && a.end.isSame(b.end, "day");
             },
 
             /**
@@ -635,23 +613,23 @@
               if (!this._picker) return;
 
               // Check if picker is actually visible
-              const pickerElement = document.querySelector('.daterangepicker');
-              if (!pickerElement || !pickerElement.classList.contains('show-calendar')) {
+              const pickerElement = document.querySelector(".daterangepicker");
+              if (!pickerElement || !pickerElement.classList.contains("show-calendar")) {
                 return;
               }
 
               // Step 1: Remove all in-range classes
-              const allCells = pickerElement.querySelectorAll('td.in-range');
-              allCells.forEach(cell => cell.classList.remove('in-range'));
+              const allCells = pickerElement.querySelectorAll("td.in-range");
+              allCells.forEach((cell) => cell.classList.remove("in-range"));
 
               // Step 2: Find start and end date cells
-              const startDateCell = pickerElement.querySelector('td.start-date');
-              const endDateCells = pickerElement.querySelectorAll('td.end-date');
+              const startDateCell = pickerElement.querySelector("td.start-date");
+              const endDateCells = pickerElement.querySelectorAll("td.end-date");
 
               // Find the end-date cell that doesn't also have start-date
               let endDateCell = null;
               for (const cell of endDateCells) {
-                if (!cell.classList.contains('start-date')) {
+                if (!cell.classList.contains("start-date")) {
                   endDateCell = cell;
                   break;
                 }
@@ -665,27 +643,27 @@
               }
 
               // Step 3: Add in-range back to cells between start and end
-              const startDate = this._picker.startDate.format('YYYY-MM-DD');
-              const endDate = this._picker.endDate.format('YYYY-MM-DD');
+              const startDate = this._picker.startDate.format("YYYY-MM-DD");
+              const endDate = this._picker.endDate.format("YYYY-MM-DD");
 
-              const allAvailableCells = pickerElement.querySelectorAll('td.available');
+              const allAvailableCells = pickerElement.querySelectorAll("td.available");
 
-              allAvailableCells.forEach(cell => {
+              allAvailableCells.forEach((cell) => {
                 // Reconstruct the cell's date
                 const cellText = cell.textContent.trim();
                 if (!cellText || isNaN(cellText)) return;
 
-                const calendar = cell.closest('.drp-calendar');
-                const monthHeader = calendar?.querySelector('.month')?.textContent;
+                const calendar = cell.closest(".drp-calendar");
+                const monthHeader = calendar?.querySelector(".month")?.textContent;
                 if (!monthHeader) return;
 
-                const [monthName, year] = monthHeader.split(' ');
+                const [monthName, year] = monthHeader.split(" ");
                 const monthIndex = moment().month(monthName).month();
-                const cellDate = moment.utc(`${year}-${monthIndex + 1}-${cellText}`, 'YYYY-M-D').format('YYYY-MM-DD');
+                const cellDate = moment.utc(`${year}-${monthIndex + 1}-${cellText}`, "YYYY-M-D").format("YYYY-MM-DD");
 
                 // Add in-range if cell date is between start and end (inclusive)
                 if (cellDate >= startDate && cellDate <= endDate) {
-                  cell.classList.add('in-range');
+                  cell.classList.add("in-range");
                 }
               });
             },
@@ -694,7 +672,7 @@
               this._helper = initOptions.helper;
               const container = document.querySelector("#f-cards-grid-layout-1_events-filter-target");
               if (!container) {
-                console.error('[DateFilter] Container not found for #f-cards-grid-layout-1_events-filter-target');
+                console.error("[DateFilter] Container not found for #f-cards-grid-layout-1_events-filter-target");
                 return;
               }
 
@@ -727,7 +705,9 @@
               // Save input reference
               this._input = container.querySelector("#date-range-picker");
               this._clearBtn = container.querySelector(".date-clear-btn");
-              this._quickPickEls = Array.from(container.querySelectorAll('.f-cards-grid-layout-1_events-filter-top-item'));
+              this._quickPickEls = Array.from(
+                container.querySelectorAll(".f-cards-grid-layout-1_events-filter-top-item")
+              );
 
               // On page load, start with no selection and placeholder
               this._clearActiveButtons();
@@ -747,8 +727,8 @@
                     this._currentRange = null;
                     if (this._picker) {
                       // Reset picker to no selection
-                      this._picker.setStartDate(moment.tz('America/Phoenix'));
-                      this._picker.setEndDate(moment.tz('America/Phoenix'));
+                      this._picker.setStartDate(moment.tz("America/Phoenix"));
+                      this._picker.setEndDate(moment.tz("America/Phoenix"));
                     }
                     this._updateInputDisplay();
                     return;
@@ -756,16 +736,16 @@
                   const quickPick = dateFilterItems.find((item) => item.label === value);
                   if (quickPick && this._input && this._picker) {
                     // Use Arizona timezone for display
-                    let start = moment.tz(quickPick.start * 1000, 'America/Phoenix').startOf('day');
-                    let end = moment.tz(quickPick.end * 1000, 'America/Phoenix').startOf('day');
+                    let start = moment.tz(quickPick.start * 1000, "America/Phoenix").startOf("day");
+                    let end = moment.tz(quickPick.end * 1000, "America/Phoenix").startOf("day");
                     // For single-day, set both start and end to the exact same moment
                     let pickerEnd = end;
-                    if (start.isSame(end, 'day')) {
+                    if (start.isSame(end, "day")) {
                       // For single day, set end to the exact same moment as start
                       pickerEnd = start.clone();
                     } else {
                       // For multi-day ranges, set end to endOf('day')
-                      pickerEnd = end.clone().endOf('day');
+                      pickerEnd = end.clone().endOf("day");
                     }
 
                     // Only update if range is different
@@ -790,10 +770,14 @@
                   const match = value.match(/(\d{2})\/(\d{2})\/(\d{4})\s*[-—]\s*(\d{2})\/(\d{2})\/(\d{4})/);
                   if (match) {
                     // Use Arizona timezone for parsing
-                    let start = moment.tz(`${match[1]}/${match[2]}/${match[3]}`, 'MM/DD/YYYY', 'America/Phoenix').startOf('day');
-                    let end = moment.tz(`${match[4]}/${match[5]}/${match[6]}`, 'MM/DD/YYYY', 'America/Phoenix').startOf('day');
+                    let start = moment
+                      .tz(`${match[1]}/${match[2]}/${match[3]}`, "MM/DD/YYYY", "America/Phoenix")
+                      .startOf("day");
+                    let end = moment
+                      .tz(`${match[4]}/${match[5]}/${match[6]}`, "MM/DD/YYYY", "America/Phoenix")
+                      .startOf("day");
                     // For single-day, force end = start
-                    if (start.isSame(end, 'day')) {
+                    if (start.isSame(end, "day")) {
                       end = start.clone();
                     }
                     // Only update if range is different
@@ -808,7 +792,7 @@
                       this._currentRange = { start, end };
                       this._updateInputDisplay();
                     }
-                  } else if (!value || value === 'Select dates') {
+                  } else if (!value || value === "Select dates") {
                     // Input cleared or placeholder text
                     this._clearAlgoliaRefinement();
                     this._clearActiveButtons();
@@ -820,28 +804,28 @@
 
               // Add event listener for the clear button
               if (this._clearBtn) {
-                this._clearBtn.addEventListener('click', () => {
+                this._clearBtn.addEventListener("click", () => {
                   this._clearAlgoliaRefinement();
                   this._clearActiveButtons();
                   this._currentRange = null;
                   if (this._picker) {
-                    this._picker.setStartDate(moment.tz('America/Phoenix'));
-                    this._picker.setEndDate(moment.tz('America/Phoenix'));
+                    this._picker.setStartDate(moment.tz("America/Phoenix"));
+                    this._picker.setEndDate(moment.tz("America/Phoenix"));
                   }
                   this._updateInputDisplay();
                 });
               }
 
               // Add event listener for the search button
-              const searchBtn = container.querySelector('.date-search-btn');
+              const searchBtn = container.querySelector(".date-search-btn");
               if (searchBtn && this._input) {
-                searchBtn.addEventListener('click', () => {
+                searchBtn.addEventListener("click", () => {
                   // Check if picker has a selection that hasn't been applied yet
                   if (this._picker && this._picker.startDate && this._picker.endDate) {
-                    let start = this._picker.startDate.clone().tz('America/Phoenix').startOf('day');
-                    let end = this._picker.endDate.clone().tz('America/Phoenix').startOf('day');
+                    let start = this._picker.startDate.clone().tz("America/Phoenix").startOf("day");
+                    let end = this._picker.endDate.clone().tz("America/Phoenix").startOf("day");
                     // For single-day, force end = start
-                    if (start.isSame(end, 'day')) {
+                    if (start.isSame(end, "day")) {
                       end = start.clone();
                     }
 
@@ -871,8 +855,16 @@
                     let newState = this._helper.state
                       .clearRefinements("startTimestamp")
                       .clearRefinements("endTimestamp")
-                      .addNumericRefinement("startTimestamp", "<=", end.clone().endOf('day').tz('America/Phoenix').unix())
-                      .addNumericRefinement("endTimestamp", ">=", start.clone().startOf('day').tz('America/Phoenix').unix());
+                      .addNumericRefinement(
+                        "startTimestamp",
+                        "<=",
+                        end.clone().endOf("day").tz("America/Phoenix").unix()
+                      )
+                      .addNumericRefinement(
+                        "endTimestamp",
+                        ">=",
+                        start.clone().startOf("day").tz("America/Phoenix").unix()
+                      );
                     this._helper.setState(newState).search();
                     this._currentRange = { start, end };
                     this._updateInputDisplay();
@@ -881,9 +873,7 @@
               };
               this._clearAlgoliaRefinement = () => {
                 if (this._helper) {
-                  let newState = this._helper.state
-                    .clearRefinements("startTimestamp")
-                    .clearRefinements("endTimestamp");
+                  let newState = this._helper.state.clearRefinements("startTimestamp").clearRefinements("endTimestamp");
                   this._helper.setState(newState).search();
                   this._currentRange = null;
                   this._updateInputDisplay();
@@ -892,43 +882,46 @@
 
               // Initialize daterangepicker if available
               if (window.$ && window.$.fn && window.$.fn.daterangepicker && this._input) {
-                this._picker = window.$(this._input).daterangepicker({
-                  opens: "center",
-                  autoUpdateInput: false, // We'll handle input updates manually
-                  locale: {
-                    format: "MM/DD/YYYY",
-                    separator: "  —  ",
-                    applyLabel: "Apply",
-                    cancelLabel: "Cancel",
-                    fromLabel: "From",
-                    toLabel: "To",
-                    customRangeLabel: "Custom",
-                    weekLabel: "W",
-                    daysOfWeek: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-                    monthNames: [
-                      "January",
-                      "February",
-                      "March",
-                      "April",
-                      "May",
-                      "June",
-                      "July",
-                      "August",
-                      "September",
-                      "October",
-                      "November",
-                      "December"
-                    ],
-                  },
-                }).data('daterangepicker');
+                this._picker = window
+                  .$(this._input)
+                  .daterangepicker({
+                    opens: "center",
+                    autoUpdateInput: false, // We'll handle input updates manually
+                    locale: {
+                      format: "MM/DD/YYYY",
+                      separator: "  —  ",
+                      applyLabel: "Apply",
+                      cancelLabel: "Cancel",
+                      fromLabel: "From",
+                      toLabel: "To",
+                      customRangeLabel: "Custom",
+                      weekLabel: "W",
+                      daysOfWeek: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+                      monthNames: [
+                        "January",
+                        "February",
+                        "March",
+                        "April",
+                        "May",
+                        "June",
+                        "July",
+                        "August",
+                        "September",
+                        "October",
+                        "November",
+                        "December",
+                      ],
+                    },
+                  })
+                  .data("daterangepicker");
 
                 // Listen for apply event
-                window.$(this._input).on('apply.daterangepicker', (ev, picker) => {
+                window.$(this._input).on("apply.daterangepicker", (ev, picker) => {
                   // Use Arizona timezone for picker
-                  let start = picker.startDate.clone().tz('America/Phoenix').startOf('day');
-                  let end = picker.endDate.clone().tz('America/Phoenix').startOf('day');
+                  let start = picker.startDate.clone().tz("America/Phoenix").startOf("day");
+                  let end = picker.endDate.clone().tz("America/Phoenix").startOf("day");
                   // For single-day, force end = start
-                  if (start.isSame(end, 'day')) {
+                  if (start.isSame(end, "day")) {
                     end = start.clone();
                   }
                   // Only update if range is different
@@ -946,19 +939,19 @@
                 });
 
                 // Listen for picker show/hide events
-                window.$(this._input).on('show.daterangepicker', (ev, picker) => {
+                window.$(this._input).on("show.daterangepicker", (ev, picker) => {
                   // Run our fix after picker is shown and has time to render
                   setTimeout(() => {
                     this._fixPickerHighlighting();
                   }, 100);
                 });
 
-                window.$(this._input).on('hide.daterangepicker', (ev, picker) => {
+                window.$(this._input).on("hide.daterangepicker", (ev, picker) => {
                   // Picker closed
                 });
 
                 // Listen for clear/cancel
-                window.$(this._input).on('cancel.daterangepicker', (ev, picker) => {
+                window.$(this._input).on("cancel.daterangepicker", (ev, picker) => {
                   ev.preventDefault();
                   ev.stopPropagation();
                   this._clearAlgoliaRefinement();
@@ -968,50 +961,45 @@
                 });
               } else {
                 if (!window.$) {
-                  console.error('[DateFilter] jQuery ($) is not loaded');
+                  console.error("[DateFilter] jQuery ($) is not loaded");
                 } else if (!window.$.fn || !window.$.fn.daterangepicker) {
-                  console.error('[DateFilter] daterangepicker plugin is not loaded');
+                  console.error("[DateFilter] daterangepicker plugin is not loaded");
                 } else if (!this._input) {
-                  console.error('[DateFilter] #date-range-picker input not found for daterangepicker');
+                  console.error("[DateFilter] #date-range-picker input not found for daterangepicker");
                 }
               }
             },
-            render() { }, // No-op, handled in init
+            render() {}, // No-op, handled in init
             getWidgetSearchParameters(searchParameters) {
               // Always clear date refinements; input change will handle them
-              return searchParameters
-                .clearRefinements("startTimestamp")
-                .clearRefinements("endTimestamp");
+              return searchParameters.clearRefinements("startTimestamp").clearRefinements("endTimestamp");
             },
           };
 
           // Replace your createCurrentRefinementsWidget function with this:
 
           function createCurrentRefinementsWidget(containerSelector) {
-            return instantsearch.connectors.connectCurrentRefinements(
-              (renderOptions, isFirstRender) => {
-                const { items, refine, widgetParams } = renderOptions;
-                const container = document.querySelector(widgetParams.container);
+            return instantsearch.connectors.connectCurrentRefinements((renderOptions, isFirstRender) => {
+              const { items, refine, widgetParams } = renderOptions;
+              const container = document.querySelector(widgetParams.container);
 
-                // Filter out date-related refinements (startTimestamp and endTimestamp)
-                const filteredItems = items.filter(
-                  (group) =>
-                    group.attribute !== "startTimestamp" &&
-                    group.attribute !== "endTimestamp"
-                );
+              // Filter out date-related refinements (startTimestamp and endTimestamp)
+              const filteredItems = items.filter(
+                (group) => group.attribute !== "startTimestamp" && group.attribute !== "endTimestamp"
+              );
 
-                container.innerHTML = `
+              container.innerHTML = `
              <ul class="f-cards-layout-1_CurrentRefinements-list">
                ${filteredItems
-                    .flatMap((group) =>
-                      group.refinements.map(
-                        (refinement) => `
+                 .flatMap((group) =>
+                   group.refinements.map(
+                     (refinement) => `
                      <li class="ais-CurrentRefinements-item">
-                       <span class="active-facet-tag ${FACET_CLASS_MAP[group.attribute] || "default-tag"
-                          }">
+                       <span class="active-facet-tag ${FACET_CLASS_MAP[group.attribute] || "default-tag"}">
                          ${formatFacetValue(refinement.label, group.attribute)}
-                         <button class="remove-refinement-button" data-value="${refinement.value
-                          }" data-attribute="${group.attribute}">
+                         <button class="remove-refinement-button" data-value="${refinement.value}" data-attribute="${
+                       group.attribute
+                     }">
                           <svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M7.88893 7.62073L7.62067 7.88893C7.47258 8.03702 7.23243 8.03702 7.08428 7.88893L4 4.8046L0.915674 7.88887C0.767579 8.03702 0.527419 8.03702 0.379296 7.88887L0.111092 7.62067C-0.0370308 7.47258 -0.0370308 7.23243 0.111092 7.08428L3.19541 4L0.111092 0.915674C-0.0370308 0.767579 -0.0370308 0.527419 0.111092 0.379296L0.37929 0.111098C0.527413 -0.0370254 0.767579 -0.0370254 0.915674 0.111098L4 3.19541L7.08428 0.111092C7.23243 -0.0370308 7.47258 -0.0370308 7.62067 0.111092L7.88893 0.37929C8.03702 0.527413 8.03702 0.767579 7.88893 0.915674L4.8046 4L7.88893 7.08428C8.03702 7.23243 8.03702 7.47258 7.88893 7.62073Z" fill="white" style="fill:white;fill-opacity:1;"/>
                           </svg>                                       
@@ -1019,32 +1007,33 @@
                        </span>
                      </li>
                    `
-                      )
-                    )
-                    .join("")}
+                   )
+                 )
+                 .join("")}
              </ul>
            `;
 
-                container.addEventListener("click", (event) => {
-                  const button = event.target.closest(".remove-refinement-button");
-                  if (button) {
-                    event.preventDefault();
-                    const refinementToRemove = filteredItems
-                      .flatMap((group) => group.refinements)
-                      .find((ref) => ref.value === button.dataset.value);
+              container.addEventListener("click", (event) => {
+                const button = event.target.closest(".remove-refinement-button");
+                if (button) {
+                  event.preventDefault();
+                  const refinementToRemove = filteredItems
+                    .flatMap((group) => group.refinements)
+                    .find((ref) => ref.value === button.dataset.value);
 
-                    if (refinementToRemove) {
-                      refine(refinementToRemove);
-                    }
+                  if (refinementToRemove) {
+                    refine(refinementToRemove);
                   }
-                });
-              }
-            )({
+                }
+              });
+            })({
               container: containerSelector,
             });
           }
 
           const prefilters = groupPrefilters(getPrefiltersFromDOM());
+
+          const todayStart = moment.tz("America/Phoenix").startOf("day").unix();
 
           const search = instantsearch({
             indexName: indexName,
@@ -1053,31 +1042,26 @@
             initialUiState: {
               [indexName]: {
                 refinementList: prefilters,
+                numericFilters: [`endTimestamp>=${todayStart}`],
               },
             },
           });
 
           const createRefinementListItemTemplate =
             (attributeName) =>
-              (item, { html }) => {
-                const hasIcon =
-                  FACET_ICON_MAP[attributeName] &&
-                  FACET_ICON_MAP[attributeName][item.value];
-                let iconHtml = "";
+            (item, { html }) => {
+              const hasIcon = FACET_ICON_MAP[attributeName] && FACET_ICON_MAP[attributeName][item.value];
+              let iconHtml = "";
 
-                if (hasIcon) {
-                  const sanitizedValue = item.value.replace(/[^a-zA-Z0-9-_]/g, "-");
-                  const iconClass = `icon--${attributeName}-${sanitizedValue}`;
-                  iconHtml = html`<span
-                  class="f-cards-grid-layout-1_filter-item-icon ${iconClass}"
-                ></span>`;
-                }
+              if (hasIcon) {
+                const sanitizedValue = item.value.replace(/[^a-zA-Z0-9-_]/g, "-");
+                const iconClass = `icon--${attributeName}-${sanitizedValue}`;
+                iconHtml = html`<span class="f-cards-grid-layout-1_filter-item-icon ${iconClass}"></span>`;
+              }
 
-                return html` <a
+              return html` <a
                 href="#"
-                class="f-cards-grid-layout-1_filter-collection-item ${item.isRefined
-                    ? "is-active"
-                    : ""}"
+                class="f-cards-grid-layout-1_filter-collection-item ${item.isRefined ? "is-active" : ""}"
                 data-value="${item.value}"
               >
                 ${iconHtml}
@@ -1086,7 +1070,7 @@
                   <span class="facet-count"> (${item.count})</span>
                 </div>
               </a>`;
-              };
+            };
 
           search.addWidgets([
             instantsearch.widgets.searchBox({
@@ -1124,52 +1108,33 @@
                 item: (hit, { html, components }) => {
                   // Helper function to get month abbreviation
                   const getMonthAbbr = (month) => {
-                    const months = [
-                      "JAN",
-                      "FEB",
-                      "MAR",
-                      "APR",
-                      "MAY",
-                      "JUN",
-                      "JUL",
-                      "AUG",
-                      "SEP",
-                      "OCT",
-                      "NOV",
-                      "DEC",
-                    ];
+                    const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
                     return months[month - 1] || "JAN";
                   };
 
                   // Check if it's a single day event
                   const isSingleDay =
-                    hit.startYear === hit.endYear &&
-                    hit.startMonth === hit.endMonth &&
-                    hit.startDay === hit.endDay;
+                    hit.startYear === hit.endYear && hit.startMonth === hit.endMonth && hit.startDay === hit.endDay;
 
                   // Generate the date wrapper HTML
                   const dateWrapperHtml = isSingleDay
                     ? // Single day event - show only start date
-                    html`<div
+                      html`<div
                         class="f-cards-grid-layout-1_events-date-wrapper"
                         style="transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg); transform-style: preserve-3d;"
                       >
                         <div class="showcase-style-9_start-date-wrapper">
-                          <div class="text-size-small text-style-allcaps">
-                            ${getMonthAbbr(hit.startMonth)}
-                          </div>
+                          <div class="text-size-small text-style-allcaps">${getMonthAbbr(hit.startMonth)}</div>
                           <div class="showcase-style-9_date-day">${hit.startDay}</div>
                         </div>
                       </div>`
                     : // Multi-day event - show start and end dates with chevron
-                    html`<div
+                      html`<div
                         class="f-cards-grid-layout-1_events-date-wrapper"
                         style="transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0deg) rotateY(0deg) rotateZ(0deg) skew(0deg, 0deg); transform-style: preserve-3d;"
                       >
                         <div class="showcase-style-9_start-date-wrapper">
-                          <div class="text-size-small text-style-allcaps">
-                            ${getMonthAbbr(hit.startMonth)}
-                          </div>
+                          <div class="text-size-small text-style-allcaps">${getMonthAbbr(hit.startMonth)}</div>
                           <div class="showcase-style-9_date-day">${hit.startDay}</div>
                         </div>
                         <div class="showcase-style-9_chevron w-embed">
@@ -1188,30 +1153,23 @@
                           </svg>
                         </div>
                         <div class="showcase-style-9_end-date-wrapper">
-                          <div class="text-size-small text-style-allcaps">
-                            ${getMonthAbbr(hit.endMonth)}
-                          </div>
+                          <div class="text-size-small text-style-allcaps">${getMonthAbbr(hit.endMonth)}</div>
                           <div class="showcase-style-9_date-day">${hit.endDay}</div>
                         </div>
                       </div>`;
 
                   return html`
-                    <a
-                      href="${hit.webflowLink}"
-                      class="f-cards-grid-layout-1_card-link-wrapper"
-                    >
+                    <a href="${hit.webflowLink}" class="f-cards-grid-layout-1_card-link-wrapper">
                       <article class="f-cards-grid-layout-1_algolia-card">
                         ${dateWrapperHtml}
                         <img
                           src="${hit.thumbnailImage ||
-                    "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/684fa625ddd0c993bb2496d7_Card%20Listing%20(Empty).avif"}"
+                          "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/684fa625ddd0c993bb2496d7_Card%20Listing%20(Empty).avif"}"
                           alt="${hit.thumbnailAltText || "Event Image"}"
                           class="f-cards-grid-layout-1_card-image"
                           onerror="this.style.display='none'"
                         />
-                        <div class="f-cards-filter_tags-container">
-                          ${renderFacetTags(hit, "Categories", html, 1)}
-                        </div>
+                        <div class="f-cards-filter_tags-container">${renderFacetTags(hit, "Categories", html, 1)}</div>
                         <h3 class="f-cards-grid-layout-1_card-h3 heading-style-h5">
                           ${components.Highlight({ attribute: "Name", hit })}
                         </h3>
@@ -1289,7 +1247,7 @@
 
           search.start();
         }
-        if (document.readyState === 'loading') {
+        if (document.readyState === "loading") {
           document.addEventListener("DOMContentLoaded", runMain);
         } else {
           runMain();
