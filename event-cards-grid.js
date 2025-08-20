@@ -992,11 +992,8 @@
                         const customButtonsContainer = document.createElement("div");
                         customButtonsContainer.className = "custom-picker-buttons";
                         customButtonsContainer.style.cssText = `
-                          display: flex;
-                          gap: 8px;
-                          justify-content: flex-end;
+                          display: block;
                           padding: 8px;
-                          width: 100%;
                         `;
 
                         // Create Apply button
@@ -1011,6 +1008,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: .875rem;
+            margin-left: 8px;
           `;
 
                         // Create Cancel button
