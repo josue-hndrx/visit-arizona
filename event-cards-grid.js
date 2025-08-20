@@ -1091,7 +1091,6 @@
             };
 
           search.addWidgets([
-            debugWidget,
             futureEventsFilter,
             instantsearch.widgets.searchBox({
               container: "#f-cards-filter_searchbox",
