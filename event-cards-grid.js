@@ -694,10 +694,6 @@
                         <path d="M9.5 2.5L2.5 9.5M2.5 2.5L9.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     </button>
-                    <div class="date-picker-buttons">
-                      <button type="button" class="date-submit-btn">Apply</button>
-                      <button type="button" class="date-cancel-btn">Cancel</button>
-                    </div>
                   </div>
                   <div class="quick-picks-wrapper">
                     ${quickPickHtml}
@@ -980,6 +976,107 @@
                     },
                   })
                   .data("daterangepicker");
+
+                // Add custom buttons to the daterangepicker
+                window.$(this._input).on("show.daterangepicker", (ev, picker) => {
+                  // Run our fix after picker is shown and has time to render
+                  setTimeout(() => {
+                    this._fixPickerHighlighting();
+
+                    // Add custom buttons to the picker
+                    const pickerElement = document.querySelector(".daterangepicker");
+                    if (pickerElement) {
+                      // Check if we already added the buttons
+                      if (!pickerElement.querySelector(".custom-picker-buttons")) {
+                        // Create custom buttons container
+                        const customButtonsContainer = document.createElement("div");
+                        customButtonsContainer.className = "custom-picker-buttons";
+                        customButtonsContainer.style.cssText = `
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            padding: 10px 15px;
+            border-top: 1px solid #ddd;
+            background: #f8f9fa;
+          `;
+
+                        // Create Apply button
+                        const applyBtn = document.createElement("button");
+                        applyBtn.textContent = "Apply";
+                        applyBtn.className = "custom-apply-btn";
+                        applyBtn.style.cssText = `
+            padding: 6px 12px;
+            background: #007bff;
+            color: white;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+          `;
+
+                        // Create Cancel button
+                        const cancelBtn = document.createElement("button");
+                        cancelBtn.textContent = "Cancel";
+                        cancelBtn.className = "custom-cancel-btn";
+                        cancelBtn.style.cssText = `
+            padding: 6px 12px;
+            background: white;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+          `;
+
+                        // Add event listeners
+                        applyBtn.addEventListener("click", () => {
+                          // Apply the current picker selection
+                          if (this._picker && this._picker.startDate && this._picker.endDate) {
+                            let start = this._picker.startDate.clone().tz("America/Phoenix").startOf("day");
+                            let end = this._picker.endDate.clone().tz("America/Phoenix").startOf("day");
+                            if (start.isSame(end, "day")) {
+                              end = start.clone();
+                            }
+
+                            this._applyAlgoliaRefinement(start, end);
+                            const matchLabel = this._findMatchingQuickPick(start, end);
+                            if (matchLabel) {
+                              this._setActiveButton(matchLabel);
+                            } else {
+                              this._clearActiveButtons();
+                            }
+                            this._currentRange = { start, end };
+                            this._updateInputDisplay();
+                          }
+
+                          // Close the picker
+                          this._picker.hide();
+                        });
+
+                        cancelBtn.addEventListener("click", () => {
+                          // Reset picker to current range or clear
+                          if (this._currentRange) {
+                            this._picker.setStartDate(this._currentRange.start);
+                            this._picker.setEndDate(this._currentRange.end);
+                          } else {
+                            this._picker.setStartDate(moment.tz("America/Phoenix"));
+                            this._picker.setEndDate(moment.tz("America/Phoenix"));
+                          }
+
+                          // Close the picker
+                          this._picker.hide();
+                        });
+
+                        // Add buttons to container
+                        customButtonsContainer.appendChild(cancelBtn);
+                        customButtonsContainer.appendChild(applyBtn);
+
+                        // Add container to picker
+                        pickerElement.appendChild(customButtonsContainer);
+                      }
+                    }
+                  }, 100);
+                });
 
                 // Listen for apply event
                 window.$(this._input).on("apply.daterangepicker", (ev, picker) => {
