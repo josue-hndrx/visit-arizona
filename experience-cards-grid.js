@@ -22,12 +22,17 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize Algolia search client
   const searchClient = algoliasearch("LF0CCFQRH3", "9ff98e053974ef9b01af86dfe17897f7");
 
+  const baseIndexName = url.searchParams.get("index") || "experiences_cms_items";
+
+  const indexName =
+    baseIndexName === "like_a_local_cms_items"
+      ? "like_a_local_cms_items_date_desc" // Use the replica
+      : baseIndexName; // Use primary index
+
   const sortBy =
     indexName === "like_a_local_cms_items"
       ? ["publishTimestamp:desc"] // Sort by date, newest first
       : ["name:asc"]; // Default alphabetical sorting
-
-  const indexName = url.searchParams.get("index") || "experiences_cms_items";
 
   const PREFILTER_CONFIG = {
     Regions: "#f-cards-filter_regions-prefilter",
