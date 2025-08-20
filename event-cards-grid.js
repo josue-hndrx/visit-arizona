@@ -1035,20 +1035,11 @@
 
           const todayStart = moment.tz("America/Phoenix").startOf("day").unix();
 
-          // Debugging
-          console.log("Today start timestamp (Arizona):", todayStart);
-          console.log("Today date (Arizona):", moment.tz("America/Phoenix").format("YYYY-MM-DD"));
-          console.log(
-            "Sample event endTimestamp (1746230400) converts to:",
-            moment.unix(1746230400).tz("America/Phoenix").format("YYYY-MM-DD")
-          );
-
           const futureEventsFilter = {
             init(initOptions) {
               this.helper = initOptions.helper;
 
               // Apply the filter immediately
-              console.log("Applying future events filter with timestamp:", todayStart);
               this.helper.addNumericRefinement("endTimestamp", ">=", todayStart);
               this.helper.search();
             },
@@ -1073,30 +1064,6 @@
               },
             },
           });
-
-          const debugWidget = {
-            init() {
-              console.log("Debug: Search initialized with numericFilters:", [`endTimestamp>=${todayStart}`]);
-            },
-            render(renderOptions) {
-              console.log("Debug: Search results:", renderOptions.results);
-              console.log("Debug: Applied filters:", renderOptions.results.appliedFilters);
-              console.log("Debug: Number of hits:", renderOptions.results.nbHits);
-
-              // Log the first few results to see their timestamps
-              if (renderOptions.results.hits && renderOptions.results.hits.length > 0) {
-                console.log("Debug: First 3 results:");
-                renderOptions.results.hits.slice(0, 3).forEach((hit, index) => {
-                  console.log(`Result ${index + 1}:`, {
-                    name: hit.Name,
-                    endTimestamp: hit.endTimestamp,
-                    endDate: moment.unix(hit.endTimestamp).tz("America/Phoenix").format("YYYY-MM-DD"),
-                    startDate: moment.unix(hit.startTimestamp).tz("America/Phoenix").format("YYYY-MM-DD"),
-                  });
-                });
-              }
-            },
-          };
 
           const createRefinementListItemTemplate =
             (attributeName) =>
