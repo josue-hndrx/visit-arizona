@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
       : baseIndexName; // Use primary index
 
   const sortBy =
-    indexName === "like_a_local_cms_items"
+    baseIndexName === "like_a_local_cms_items"
       ? ["publishTimestamp:desc"] // Sort by date, newest first
       : ["name:asc"]; // Default alphabetical sorting
 
