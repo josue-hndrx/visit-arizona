@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
       "trip-ideas-itineraries":
         "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/684f84ca4bbab778955875a1_Vector%20(2).svg",
       "culture-traditions":
-        "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/6848c78bde8cc5698acc7d49_Tribal%20Lands%20Icon.svg",
+        "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/68abbd8f5309c4340d7ffe40_culture-traditions-new.svg",
       culinary:
         "https://cdn.prod.website-files.com/683a4969614808c01cd0d378/6848c78369c9fc20fd2c6ca4_Savor%20Arizona%20Icon.svg",
       entertainment:

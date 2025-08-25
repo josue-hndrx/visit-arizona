@@ -62,7 +62,7 @@ const FACET_ICON_MAP = {
     "rivers-lakes":
       "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/6850e9092f026d90c254477d_rivers-lakes.svg",
     "american-indian":
-      "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/6850e9099cc6aa8c8688135c_tribal-lands.svg",
+      "https://cdn.prod.website-files.com/683a4969614808c01cd0d34f/68abbd9057918ff9b22a78c5_tribal-lands-new.svg",
   },
 };
 
