@@ -302,6 +302,10 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
   search.addWidgets([
+    instantsearch.widgets.configure({
+      filters: "nonEnglishArticle:false",
+    }),
+
     instantsearch.widgets.searchBox({
       container: "#f-cards-filter_searchbox",
       placeholder: "Search Destinations, Experiences, Travel Content",
