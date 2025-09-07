@@ -302,10 +302,6 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
   search.addWidgets([
-    instantsearch.widgets.configure({
-      filters: "nonEnglishArticle:false",
-    }),
-
     instantsearch.widgets.searchBox({
       container: "#f-cards-filter_searchbox",
       placeholder: "Search Destinations, Experiences, Travel Content",
@@ -328,6 +324,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     instantsearch.widgets.hits({
       container: "#f-cards-filter_hits-grid",
+      transformItems(items) {
+        // Filter items to only show English articles (nonEnglishArticle: false)
+        return items.filter(item => item.nonEnglishArticle === false);
+      },
       templates: {
         item: (hit, { html, components }) => html`
           <a href="${hit.webflowLink}" class="f-cards-grid-layout-1_card-link-wrapper">
