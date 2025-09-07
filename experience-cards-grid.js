@@ -303,7 +303,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   search.addWidgets([
     instantsearch.widgets.configure({
-      filters: "non-english-article:true",
+      filters: "nonEnglishArticle:true",
     }),
 
     instantsearch.widgets.searchBox({
